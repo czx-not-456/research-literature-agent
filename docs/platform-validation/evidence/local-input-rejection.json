@@ -1,0 +1,10 @@
+{
+  "scope": "local script only, not AgentArts",
+  "command": "python -X utf8 docs/platform-validation/scripts/probe_external_search.py --query \"   \"",
+  "observed_output": {
+    "status": "invalid_input",
+    "error": "query must contain 1..200 characters"
+  },
+  "upstream_request_sent": false,
+  "note": "Observed in this session; platform failure-path validation not performed"
+}

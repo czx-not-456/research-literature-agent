@@ -1,0 +1,245 @@
+Source: https://github.com/Future-House/paper-qa/blob/main/src/paperqa/readers.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=19143
+
+1: from __future__ import annotations
+2: 
+3: import asyncio
+4: import os
+5: from collections.abc import Awaitable, Callable
+6: from importlib.metadata import version
+7: from math import ceil
+8: from pathlib import Path
+9: from typing import Literal, Protocol, TypeAlias, cast, overload, runtime_checkable
+10: 
+11: import anyio
+12: import tiktoken
+13: from aviary.core import is_coroutine_callable
+14: from html2text import __version__ as html2text_version
+15: from html2text import html2text
+16: 
+17: from paperqa.types import (
+18:     ChunkMetadata,
+19:     Doc,
+20:     ParsedMedia,
+21:     ParsedMetadata,
+22:     ParsedText,
+23:     Text,
+24: )
+25: from paperqa.utils import ImpossibleParsingError
+26: from paperqa.version import __version__ as pqa_version
+27: 
+28: 
+29: @runtime_checkable
+30: class SyncPDFParserFn(Protocol):
+31:     """Protocol for synchronously parsing a PDF."""
+32: 
+33:     def __call__(
+34:         self,
+35:         path: str | os.PathLike,
+36:         page_size_limit: int | None = None,
+37:         page_range: int | tuple[int, int] | None = None,
+38:         **kwargs,
+39:     ) -> ParsedText: ...
+40: 
+41: 
+42: @runtime_checkable
+43: class AsyncPDFParserFn(Protocol):
+44:     """Protocol for asynchronously parsing a PDF."""
+45: 
+46:     async def __call__(
+47:         self,
+48:         path: str | os.PathLike,
+49:         page_size_limit: int | None = None,
+50:         page_range: int | tuple[int, int] | None = None,
+51:         **kwargs,
+52:     ) -> ParsedText: ...
+53: 
+54: 
+55: PDFParserFn: TypeAlias = SyncPDFParserFn | AsyncPDFParserFn
+56: 
+57: 
+58: def resolve_page_range(
+59:     page_range: int | tuple[int, int] | None, page_count: int
+60: ) -> range:
+61:     """Convert a 1-indexed page_range into a 0-indexed range object."""
+62:     if page_range is None:
+63:         return range(page_count)
+64:     if isinstance(page_range, int):
+65:         return range(page_range - 1, min(page_range, page_count))
+66:     return range(page_range[0] - 1, min(page_range[1], page_count))
+67: 
+68: 
+69: async def parse_image(
+70:     path: str | os.PathLike, validator: Callable[[bytes], Awaitable] | None = None, **_
+71: ) -> ParsedText:
+81:     parsed_media = ParsedMedia(index=0, data=image_data, info={"suffix": apath.suffix})
+82:     metadata = ParsedMetadata(
+83:         parsing_libraries=[],
+84:         paperqa_version=pqa_version,
+88:     )
+89:     return ParsedText(content={"1": ("", [parsed_media])}, metadata=metadata)
+90: 
+91: 
+92: def _make_chunk(
+93:     parsed_text: ParsedText, doc: Doc, text: str, lower_page: str, upper_page: str
+94: ) -> Text:
+95:     media: list[ParsedMedia] = []
+96:     for pg_num in range(int(lower_page), int(upper_page) + 1):
+97:         pg_contents = cast(dict, parsed_text.content).get(str(pg_num))
+98:         if isinstance(pg_contents, tuple):
+99:             media.extend(pg_contents[1])
+100:     # pretty formatting of pages (e.g. 1-3, 4, 5-7)
+101:     name = "-".join([lower_page, upper_page])
+102:     return Text(text=text, name=f"{doc.docname} pages {name}", media=media, doc=doc)
+103: 
+104: 
+105: def chunk_pdf(
+106:     parsed_text: ParsedText, doc: Doc, chunk_chars: int, overlap: int
+107: ) -> list[Text]:
+108:     pages: list[str] = []
+109:     texts: list[Text] = []
+110:     split: str = ""
+122: 
+123:     for page_num, page_contents in parsed_text.content.items():
+124:         page_text = (
+125:             page_contents if isinstance(page_contents, str) else page_contents[0]
+126:         )
+127:         split += page_text
+128:         pages.append(page_num)
+129:         # split could be so long it needs to be split
+130:         # into multiple chunks. Or it could be so short
+133:             texts.append(
+134:                 _make_chunk(parsed_text, doc, split[:chunk_chars], pages[0], pages[-1])
+135:             )
+136:             split = split[chunk_chars - overlap :]
+137:             pages = [page_num]
+138: 
+139:     if len(split) > overlap or not texts:
+140:         texts.append(
+141:             _make_chunk(parsed_text, doc, split[:chunk_chars], pages[0], pages[-1])
+142:         )
+143:     return texts
+145: 
+146: def parse_text(
+147:     path: str | os.PathLike,
+148:     html: bool = False,
+149:     split_lines: bool = False,
+150:     page_size_limit: int | None = None,
+151:     **_,
+152: ) -> ParsedText:
+158:         split_lines: flag to split lines into a list.
+159:         page_size_limit: optional limit on the number of characters per page. Only
+160:             relevant when split_lines is True.
+161:     """
+185:         for i, t in enumerate(text):
+186:             if page_size_limit and len(text) > page_size_limit:
+187:                 raise ImpossibleParsingError(
+188:                     f"The {parse_summary} on page {i} of {len(text)} was {len(t)} chars"
+189:                     f" long, which exceeds the {page_size_limit} char limit at path"
+190:                     f" {path}."
+191:                 )
+193:         content=text,
+194:         metadata=ParsedMetadata(
+195:             parsing_libraries=parsing_libraries,
+196:             paperqa_version=pqa_version,
+202: 
+203: def parse_office_doc(
+204:     path: str | os.PathLike,
+205:     **kwargs,
+226:         if isinstance(el, Image):
+227:             image_data = el.metadata.image_data
+228:             # Create a ParsedMedia object
+229:             parsed_media = ParsedMedia(
+231:                 data=image_data,  # ty: ignore[invalid-argument-type]
+232:                 info={"suffix": el.metadata.image_mime_type},
+233:             )
+234:             media_list.append(parsed_media)
+237:             # For tables, we could get the HTML representation for better structure
+238:             if el.metadata.text_as_html:
+239:                 current_text += el.metadata.text_as_html + "\n\n"
+240:         else:
+241:             current_text += str(el) + "\n\n"
+242: 
+243:     # For office docs, we can treat the whole document as a single "page"
+244:     content_dict["1"] = (current_text, media_list)
+245: 
+247:         content=content_dict,
+248:         metadata=ParsedMetadata(
+249:             parsing_libraries=[f"{unstructured.__name__} ({UNSTRUCTURED_VERSION})"],
+250:             paperqa_version=pqa_version,
+257: 
+258: def chunk_text(
+259:     parsed_text: ParsedText,
+260:     doc: Doc,
+290:     # convert from characters to chunks
+291:     char_count = parsed_text.metadata.total_parsed_text_length  # e.g., 25,000
+292:     token_count = len(content)  # e.g., 4,500
+293:     chars_per_token = char_count / token_count  # e.g., 5.5
+317: 
+318: def chunk_code_text(
+319:     parsed_text: ParsedText, doc: Doc, chunk_chars: int, overlap: int
+320: ) -> list[Text]:
+362: # When HTML reader supports images, add here
+363: ENRICHMENT_EXTENSIONS = tuple({".pdf", ".docx", ".xlsx", ".pptx", *IMAGE_EXTENSIONS})
+364: 
+365: 
+366: @overload
+367: async def read_doc(
+368:     path: str | os.PathLike,
+369:     doc: Doc,
+370:     parsed_text_only: Literal[True],
+371:     include_metadata: Literal[True],
+372:     chunk_chars: int = ...,
+373:     overlap: int = ...,
+374:     multimodal_enricher: Callable[[ParsedText], Awaitable] | None = ...,
+375:     parse_pdf: PDFParserFn | None = ...,
+376:     **parser_kwargs,
+377: ) -> ParsedText: ...
+378: @overload
+379: async def read_doc(
+380:     path: str | os.PathLike,
+381:     doc: Doc,
+382:     parsed_text_only: Literal[True],
+383:     include_metadata: Literal[False] = ...,
+384:     chunk_chars: int = ...,
+385:     overlap: int = ...,
+386:     multimodal_enricher: Callable[[ParsedText], Awaitable] | None = ...,
+387:     parse_pdf: PDFParserFn | None = ...,
+388:     **parser_kwargs,
+389: ) -> ParsedText: ...
+390: @overload
+391: async def read_doc(
+392:     path: str | os.PathLike,
+393:     doc: Doc,
+394:     parsed_text_only: Literal[False],
+395:     include_metadata: Literal[True],
+396:     chunk_chars: int = ...,
+397:     overlap: int = ...,
+398:     multimodal_enricher: Callable[[ParsedText], Awaitable] | None = ...,
+399:     parse_pdf: PDFParserFn | None = ...,
+400:     **parser_kwargs,
+401: ) -> tuple[list[Text], ParsedMetadata]: ...
+402: @overload
+403: async def read_doc(
+404:     path: str | os.PathLike,
+405:     doc: Doc,
+406:     parsed_text_only: Literal[False] = ...,
+407:     include_metadata: Literal[False] = ...,
+408:     chunk_chars: int = ...,
+409:     overlap: int = ...,
+410:     multimodal_enricher: Callable[[ParsedText], Awaitable] | None = ...,
+411:     parse_pdf: PDFParserFn | None = ...,
+412:     **parser_kwargs,
+413: ) -> list[Text]: ...
+414: @overload
+415: async def read_doc(
+416:     path: str | os.PathLike,
+417:     doc: Doc,
+418:     *,
+419:     include_metadata: Literal[True],
+420:     chunk_chars: int = ...,
+421:     overlap: int = ...,
+422:     multimodal_enricher: Callable[[ParsedText], Awaitable] | None = ...,
+
+[Snapshot excerpt truncated here; not a complete upstream file.]

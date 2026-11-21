@@ -1,0 +1,37 @@
+{
+  "source": "User-provided PowerShell output preserved in the conversation",
+  "region": "cn-southwest-2",
+  "gateway": "research-literature-mcp-gateway",
+  "signing": "V11-HMAC-SHA256",
+  "scope": "local client → AgentArts MCP gateway → Crossref",
+  "query": "retrieval augmented generation",
+  "output": {
+    "status": "ok",
+    "scope": "gateway_mcp_only",
+    "tools": [
+      "crossref-search_search_papers"
+    ],
+    "papers": [
+      {
+        "title": [
+          "Retrieval-Augmented Generation: Enhancing AI with Reliable Knowledge."
+        ],
+        "doi": "10.21275/sr251104092705",
+        "url": "https://doi.org/10.21275/sr251104092705"
+      },
+      {
+        "title": [
+          "Evaluation of Retrieval Methods in Domain-Specific Chatbots Based on Retrieval-Augmented Generation",
+          "Evaluasi Metode Retrieval pada Chatbot Domain Khusus Berbasis Retrieval-Augmented Generation"
+        ],
+        "doi": "10.36085/jsai.v9i1.9897",
+        "url": "https://doi.org/10.36085/jsai.v9i1.9897"
+      }
+    ]
+  },
+  "unverified": [
+    "Cloud Runtime workload identity obtains temporary credentials accepted by this gateway",
+    "Agent tool choice and execution",
+    "agent public API invocation"
+  ]
+}

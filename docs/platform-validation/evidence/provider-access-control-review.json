@@ -1,0 +1,24 @@
+{
+  "reviewed_utc": "2026-11-18T08:15:51.702668+00:00",
+  "source_file": "屏幕截图 2026-11-18 161220.png",
+  "sha256": "c4d3a1b7d58463b1f06131397d9d37e28ec7df009048fef07ed6df66cd5240f4",
+  "observed": {
+    "authentication": "API Key认证",
+    "identity_selected": "deepseek-api-key",
+    "location_selected": "标头",
+    "name_field_default_help": "Authorization",
+    "prefix_help_example": "Bearer",
+    "network_selected": "公网访问",
+    "tags_optional": true
+  },
+  "other_location_option": "参数查询 (user-reported)",
+  "recommended_values": {
+    "location": "标头",
+    "parameter_name": "Authorization",
+    "prefix": "Bearer",
+    "network": "公网访问"
+  },
+  "secret_values_read": false,
+  "supplier_saved_by_assistant": false,
+  "wire_header_verified": false
+}

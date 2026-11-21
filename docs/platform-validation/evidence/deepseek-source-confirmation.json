@@ -1,0 +1,15 @@
+{
+  "updated_utc": "2026-11-17T13:03:41.397928+00:00",
+  "source": "user confirmation plus current official pricing documentation",
+  "official_platform_confirmed": true,
+  "display_names_reported": [
+    "DeepSeek V4.1 Flash",
+    "DeepSeek V4.1 Pro"
+  ],
+  "flash_api_id_documented": "deepseek-flash",
+  "pro_api_id_documented": "deepseek-v4-pro",
+  "pro_version_documented": "DeepSeek-V4-Pro-0813",
+  "pro_display_mismatch": "unresolved; not used for first probe",
+  "model_calls_sent": 0,
+  "credentials_read": false
+}

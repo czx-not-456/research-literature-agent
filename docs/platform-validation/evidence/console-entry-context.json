@@ -1,0 +1,14 @@
+{
+  "updated_utc": "2026-11-17T08:39:33.052790+00:00",
+  "source": "user-provided console URL",
+  "console_host": "console.huaweicloud.com",
+  "console_path": "/console/",
+  "route": "/home",
+  "region_parameter": "cn-southwest-2",
+  "region_display_name": "西南-贵阳一",
+  "evidence_level": "URL parameter supplied by user; not account or service coverage verification",
+  "agentarts_specific_workspace_url": null,
+  "browser_connection": "failed_before_navigation_windows_sandbox_initialization",
+  "next_needed": "AgentArts product-page screenshot or actual product-page URL and visible navigation labels",
+  "stored_url": "https://console.huaweicloud.com/console/?locale=zh-cn&region=cn-southwest-2#/home"
+}

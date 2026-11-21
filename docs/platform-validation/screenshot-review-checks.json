@@ -1,0 +1,127 @@
+{
+  "scope": "Screenshot-source and document integrity only; no platform execution",
+  "passed": 30,
+  "total": 30,
+  "checks": [
+    {
+      "check": "original-unchanged:屏幕截图 2026-11-17 164521.png",
+      "passed": true
+    },
+    {
+      "check": "original-unchanged:屏幕截图 2026-11-17 164724.png",
+      "passed": true
+    },
+    {
+      "check": "utf8:docs\\platform-validation\\acceptance-results.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\acceptance-results.md:competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\acceptance-results.md:official-capability-check.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\acceptance-results.md:minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\acceptance-results.md:model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\acceptance-results.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:docs\\platform-validation\\competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\competition-requirements-analysis.md:../../赛题要求.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:docs\\platform-validation\\managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:docs\\platform-validation\\minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\minimal-workflow-validation.md:scripts/probe_external_search.py",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\minimal-workflow-validation.md:evidence/crossref-search-probe.json",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\minimal-workflow-validation.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:docs\\platform-validation\\model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:docs\\platform-validation\\official-capability-check.md",
+      "passed": true
+    },
+    {
+      "check": "link:docs\\platform-validation\\official-capability-check.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:PROJECT_STATUS.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/pre-research/github-project-comparison.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/pre-research/technology-selection.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/pre-research/model-service-comparison.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/pre-research/academic-search-api-comparison.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/pre-research/development-risk-analysis.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/platform-validation/acceptance-results.md",
+      "passed": true
+    },
+    {
+      "check": "link:PROJECT_STATUS.md:docs/platform-validation/managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "check": "utf8:TODO.md",
+      "passed": true
+    },
+    {
+      "check": "link:TODO.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "check": "screenshots-not-platform-success",
+      "passed": true
+    }
+  ]
+}

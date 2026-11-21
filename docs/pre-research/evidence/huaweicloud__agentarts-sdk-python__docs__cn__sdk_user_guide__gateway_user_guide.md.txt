@@ -1,0 +1,148 @@
+Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/docs/cn/sdk_user_guide/gateway_user_guide.md
+Retrieved: 2026-11-16
+Snapshot: full; upstream chars=9477
+
+# Gateway SDK 使用指南
+
+## 概述
+
+Gateway SDK 提供网关管理功能，支持创建、配置和管理 MCP（Model Context Protocol）网关及其目标。本文档介绍如何使用 Gateway SDK 进行网关的创建、配置和目标管理。
+
+## 环境要求
+
+- Python 3.10+
+- 已安装 AgentArts SDK：`pip install agentarts-sdk`
+
+## 认证配置
+
+### 华为云 AK/SK 认证
+
+Gateway SDK 使用华为云 AK/SK 进行身份认证。请通过以下方式配置：
+
+**方式一：环境变量配置（推荐）**
+
+```bash
+# 设置华为云 AK/SK
+export HUAWEICLOUD_SDK_AK="your-access-key"
+export HUAWEICLOUD_SDK_SK="your-secret-key"
+```
+
+### 获取 AK/SK
+
+1. 登录华为云控制台
+2. 进入"我的凭证"页面
+3. 在"访问密钥"标签页创建或查看 AK/SK
+
+## 快速开始
+
+### 基本用法示例
+
+```python
+from agentarts.sdk.gateway import GatewayClient
+
+# 初始化客户端
+client = GatewayClient()
+
+# 创建网关
+result = client.create_gateway(
+    name="my-gateway",
+    description="我的网关",
+    protocol_type="mcp",
+    authorizer_type="iam"
+)
+
+gateway_id = None
+if result.success:
+    gateway_id = result.data.get("gateway_id")
+    print(f"网关创建成功，ID: {gateway_id}")
+else:
+    print(f"创建网关失败: {result.error}")
+
+# 创建目标
+if gateway_id is not None:
+    target_result = client.create_gateway_target(
+        gateway_id=gateway_id,
+        name="my-target",
+        description="我的目标",
+        target_configuration={
+            "mcp_server": {
+                "endpoint": "https://example.com/mcp",
+                "server_type": "sse"
+            }
+        }
+    )
+
+    if target_result.success:
+        target = target_result.data.get("target")
+        target_id = target.get("target_id")
+        print(f"目标创建成功，ID: {target_id}")
+    else:
+        print(f"创建目标失败: {target_result.error}")
+
+# 列出网关
+list_result = client.list_gateways()
+if list_result.success:
+    print(f"总网关数: {list_result.data.get('total', 0)}")
+    for gateway in list_result.data.get('gateways', []):
+        print(f"- {gateway.get('name')} (ID: {gateway.get('gateway_id')})")
+```
+
+## API 参考
+
+### GatewayClient 类
+
+#### 初始化
+
+```python
+GatewayClient(verify_ssl: bool = True)
+```
+
+**参数说明**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| verify_ssl | bool | 否 | True | 是否验证 SSL 证书 |
+
+**默认行为**：
+- 默认启用 SSL 验证（verify_ssl=True）
+
+### 网关管理方法
+
+#### create_gateway
+
+创建新的网关。
+
+```python
+create_gateway(
+    name: Optional[str] = None,
+    description: Optional[str] = None,
+    protocol_type: Optional[str] = "mcp",
+    authorizer_type: Optional[str] = "iam",
+    agency_name: Optional[str] = None,
+    authorizer_configuration: Optional[Dict[str, Any]] = None,
+    protocol_configuration: Optional[Dict[str, Any]] = None,
+    log_delivery_configuration: Optional[Dict[str, Any]] = None,
+    outbound_network_configuration: Optional[Dict[str, Any]] = None,
+    tags: Optional[List[Dict[str, str]]] = None
+) -> RequestResult
+```
+
+**参数说明**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| name | str | 否 | gateway-{random} | 网关名称 |
+| description | str | 否 | None | 网关描述 |
+| protocol_type | str | 否 | mcp | 协议类型 |
+| authorizer_type | str | 否 | iam | 授权器类型（custom_jwt/iam/api_key） |
+| agency_name | str | 否 | None | 代理名称。未提供时自动创建名为 AgentArtsCoreGateway 的代理 |
+| authorizer_configuration | Dict | 否 | None | 授权器配置 |
+| protocol_configuration | Dict | 否 | None | 协议配置，如 {"mcp": {"search_configuration": {...}}} |
+| log_delivery_configuration | Dict | 否 | {"enabled": False} | 日志投递配置 |
+| outbound_network_configuration | Dict | 否 | {"network_mode": "public"} | 出站网络配置 |
+| tags | List[Dict] | 否 | None | 资源标签列表 |
+
+**返回值**：`RequestResult` 对象
+
+**异常**：`V
+[Selected excerpt only; full source available at URL above.]

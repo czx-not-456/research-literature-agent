@@ -1,0 +1,22 @@
+[
+  {
+    "name": "openalex-price-final",
+    "url": "https://help.openalex.org/access/pricing/",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "openalex-costs",
+    "url": "https://help.openalex.org/access/example-costs/",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "openalex-home",
+    "url": "https://help.openalex.org/",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "openai-pricing",
+    "url": "https://openai.com/api/pricing/",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

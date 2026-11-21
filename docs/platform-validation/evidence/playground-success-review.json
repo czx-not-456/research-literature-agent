@@ -1,0 +1,36 @@
+{
+  "reviewed_utc": "2026-11-18T06:44:58.680112+00:00",
+  "source_file": "微信图片_20261118110254_747_786.png",
+  "bytes": 156977,
+  "sha256": "74027e7be732a76d543923293c576e179bf45f841fbec1242227fd17c963f654",
+  "method": "User report and direct visual review; assistant did not make a cloud call",
+  "observed": {
+    "page": "AgentArts / Managed Agents / Playground",
+    "region_label": "西南-贵阳一",
+    "agent_selector_text": "agent-tg2vc3r0",
+    "user_input": "请只用一句中文说明你已收到本次连通性测试，不检索文献，不调用外部工具。",
+    "response": "已收到本次连通性测试，一切正常。",
+    "status_label": "已完成深度思考",
+    "visible_time": "11月18日11:02",
+    "displayed_counters": {
+      "input": 45877,
+      "output": 11,
+      "total": 45888
+    },
+    "counter_scope_and_billing_unit": "not_verified"
+  },
+  "user_report": "agent creation successful",
+  "verified_scope": [
+    "Managed Agent created according to user report and visible selected running agent",
+    "one visible Playground text exchange succeeded"
+  ],
+  "not_verified": [
+    "exact model/provider configuration",
+    "visual workflow or tool orchestration",
+    "public deployment/version",
+    "external official API request",
+    "external tool execution",
+    "usage accounting scope and actual costs"
+  ],
+  "privacy": "No account name, delegation ID, credentials or reasoning body transcribed"
+}

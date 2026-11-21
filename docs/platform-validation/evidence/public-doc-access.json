@@ -1,0 +1,30 @@
+[
+  {
+    "name": "official-guide",
+    "url": "https://support.huaweicloud.com/agentarts/index.html",
+    "utc": "2026-11-17T08:25:37.297281+00:00",
+    "status": 200,
+    "final_url": "https://support.huaweicloud.com/agentarts/index.html",
+    "bytes": 2190,
+    "sha256": "e1be3d618bcd30c49a923ddc6a808a6bb56c247ec8083b712bfd051a78c8d226",
+    "content_status": "security_challenge",
+    "text_preview": "Security Verification\nProtected by Tencent Cloud EdgeOne"
+  },
+  {
+    "name": "official-product",
+    "url": "https://www.huaweicloud.com/product/agentarts.html?utm_source=zgcompetition",
+    "utc": "2026-11-17T08:25:37.299281+00:00",
+    "status": 200,
+    "final_url": "https://www.huaweicloud.com/product/agentarts.html?utm_source=zgcompetition",
+    "bytes": 988,
+    "sha256": "fb4bbda42b1e12354c6de7ac10d03e0867adfb8dc4ca709df6c944d250d330f2",
+    "content_status": "security_challenge",
+    "text_preview": ""
+  },
+  {
+    "name": "official-docs",
+    "url": "https://docs.huaweicloud.com/agentarts",
+    "utc": "2026-11-17T08:25:37.301304+00:00",
+    "error": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)>"
+  }
+]

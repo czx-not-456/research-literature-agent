@@ -1,0 +1,186 @@
+{
+  "date": "2026-11-16",
+  "scope": "Document integrity and single-response schema checks only; no business, PDF, model or cloud integration tests",
+  "passed": 35,
+  "total": 35,
+  "checks": [
+    {
+      "name": "required:PROJECT_STATUS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:PROJECT_STATUS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:PROJECT_STATUS.md:docs/pre-research/technology-selection.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:PROJECT_STATUS.md:docs/pre-research/github-project-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:PROJECT_STATUS.md:docs/pre-research/model-service-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:PROJECT_STATUS.md:docs/pre-research/academic-search-api-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:PROJECT_STATUS.md:docs/pre-research/development-risk-analysis.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:DEVELOPMENT_LOG.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:DEVELOPMENT_LOG.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:TECH_DECISIONS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:TECH_DECISIONS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:THIRD_PARTY_COMPONENTS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:THIRD_PARTY_COMPONENTS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:ORIGINAL_WORK.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:ORIGINAL_WORK.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:TODO.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:TODO.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:docs\\pre-research\\github-project-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:docs\\pre-research\\github-project-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:docs\\pre-research\\github-project-comparison.md:evidence/source-manifest.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "link:docs\\pre-research\\github-project-comparison.md:technology-selection.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:docs\\pre-research\\technology-selection.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:docs\\pre-research\\technology-selection.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:docs\\pre-research\\model-service-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:docs\\pre-research\\model-service-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:docs\\pre-research\\academic-search-api-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:docs\\pre-research\\academic-search-api-comparison.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "required:docs\\pre-research\\development-risk-analysis.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "utf8:docs\\pre-research\\development-risk-analysis.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "github-snapshot-count",
+      "passed": true,
+      "detail": {
+        "count": 43
+      }
+    },
+    {
+      "name": "crossref-real-schema",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "arxiv-real-schema",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "429-recorded-as-failure",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "huawei-security-page-detected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no-later-phase-artifacts",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "evidence_files_hashed": 80
+}

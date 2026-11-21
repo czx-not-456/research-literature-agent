@@ -1,0 +1,168 @@
+Source: https://github.com/infiniflow/ragflow/blob/main/README.md
+Retrieved: 2026-11-16
+Snapshot: full; upstream chars=16676
+
+<div align="center">
+<a href="https://cloud.ragflow.io/">
+<img src="https://raw.githubusercontent.com/infiniflow/ragflow/main/web/src/assets/logo-with-text.svg" width="520" alt="ragflow logo">
+</a>
+</div>
+
+<p align="center">
+  <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-DBEDFA"></a>
+  <a href="./README_zh.md"><img alt="简体中文版自述文件" src="https://img.shields.io/badge/简体中文-DFE0E5"></a>
+  <a href="./README_tzh.md"><img alt="繁體版中文自述文件" src="https://img.shields.io/badge/繁體中文-DFE0E5"></a>
+  <a href="./README_ja.md"><img alt="日本語のREADME" src="https://img.shields.io/badge/日本語-DFE0E5"></a>
+  <a href="./README_ko.md"><img alt="한국어" src="https://img.shields.io/badge/한국어-DFE0E5"></a>
+  <a href="./README_fr.md"><img alt="README en Français" src="https://img.shields.io/badge/Français-DFE0E5"></a>
+  <a href="./README_id.md"><img alt="Bahasa Indonesia" src="https://img.shields.io/badge/Bahasa Indonesia-DFE0E5"></a>
+  <a href="./README_pt_br.md"><img alt="Português(Brasil)" src="https://img.shields.io/badge/Português(Brasil)-DFE0E5"></a>
+  <a href="./README_ar.md"><img alt="README in Arabic" src="https://img.shields.io/badge/Arabic-DFE0E5"></a>
+  <a href="./README_tr.md"><img alt="Türkçe README" src="https://img.shields.io/badge/Türkçe-DFE0E5"></a>
+  <a href="./README_ru.md"><img alt="Русская версия README" src="https://img.shields.io/badge/Русский-DFE0E5"></a>
+</p>
+
+<p align="center">
+    <a href="https://x.com/intent/follow?screen_name=infiniflowai" target="_blank">
+        <img src="https://img.shields.io/twitter/follow/infiniflow?logo=X&color=%20%23f5f5f5" alt="follow on X(Twitter)">
+    </a>
+    <a href="https://cloud.ragflow.io" target="_blank">
+        <img alt="Static Badge" src="https://img.shields.io/badge/Get-Started-4e6b99">
+    </a>
+    <a href="https://hub.docker.com/r/infiniflow/ragflow" target="_blank">
+        <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/infiniflow/ragflow-stats/main/badges/docker-pulls.json&style=flat-square&logo=docker&logoColor=white" alt="RAGFlow Docker image downloads">
+    </a>
+    <a href="https://github.com/infiniflow/ragflow/releases/latest">
+        <img src="https://img.shields.io/github/v/release/infiniflow/ragflow?color=blue&label=Latest%20Release" alt="Latest Release">
+    </a>
+    <a href="https://github.com/infiniflow/ragflow/blob/main/LICENSE">
+        <img height="21" src="https://img.shields.io/badge/License-Apache--2.0-ffffff?labelColor=d4eaf7&color=2e6cc4" alt="license">
+    </a>
+</p>
+
+<h4 align="center">
+  <a href="https://cloud.ragflow.io">Cloud</a> |
+  <a href="https://ragflow.io/docs/dev/">Documentation</a> |
+  <a href="https://github.com/infiniflow/ragflow/issues/12241">Roadmap</a> |
+  <a href="https://discord.gg/NjYzJD3GM3">Discord</a>
+</h4>
+
+<div align="center" style="margin-top:20px;margin-bottom:20px;">
+<img alt="RAGFlow in the GitHub Octoverse" src="https://raw.githubusercontent.com/infiniflow/ragflow-docs/refs/heads/image/image/ragflow-octoverse.png" width="1200"/>
+</div>
+
+<div align="center">
+<a href="https://trendshift.io/repositories/9064" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9064" alt="infiniflow%2Fragflow | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+</div>
+
+<details open>
+<summary><b>📕 Table of Contents</b></summary>
+
+- 💡 [What is RAGFlow?](#-what-is-ragflow)
+- 🎮 [Get Started](#-get-started)
+- 🔥 [Latest Updates](#-latest-updates)
+- 🌟 [Key Features](#-key-features)
+- 🔎 [System Architecture](#-system-architecture)
+- 🏠 [Local Deployment](#-local-deployment)
+- 📚 [Documentation](#-documentation)
+- 📜 [Roadmap](#-roadmap)
+- 🏄 [Community](#-community)
+- 🙌 [Contributing](#-contributing)
+
+</details>
+
+## 💡 What is RAGFlow?
+
+[RAGFlow](https://ragflow.io/) is a leading open-source Retrieval-Augmented Generation ([RAG](https://ragflow.io/basics/what-is-rag)) engine that fuses cutting-edge RAG with Agent capabilities to create a superior context layer for LLMs. It offers a streamlined RAG workflow adaptable to enterprises of any scale. Powered by a converged [context engine](https://ragflow.io/basics/what-is-agent-context-engine) and pre-built agent templates, RAGFlow enables developers to transform complex data into high-fidelity, production-ready AI systems with exceptional efficiency and precision.
+
+## 🎮 Get Started
+
+Try our cloud service at [https://cloud.ragflow.io](https://cloud.ragflow.io).
+
+For local deployment, see [Local Deployment](#-local-deployment).
+
+<div align="center" style="margin-top:20px;margin-bottom:20px;">
+<img alt="Chunking demonstration" src="https://raw.githubusercontent.com/infiniflow/ragflow-docs/refs/heads/image/image/chunking.gif" width="1200"/>
+<img alt="Agentic workflow demonstration" src="https://raw.githubusercontent.com/infiniflow/ragflow-docs/refs/heads/image/image/agentic-dark.gif" width="1200"/>
+</div>
+
+## 🔥 Latest Updates
+
+- 2026-11-06 RAGFlow 1.0.0 released.
+- 2026-09-29 RAGFlow 1.0.0-rc1 released.
+- 2026-09-10 Added website content ingestion through sitemaps.
+- 2026-08-19 Introduced Knowledge Compilation to generate Wikis, Graphs, Trees, PageIndex, Mind Maps, Timelines, and Skills at the document and dataset levels.
+- 2026-08-19 Introduced Agentic RAG with Low, Medium, High, and Ultra thinking modes.
+- 2026-07-02 Added Google BigQuery data source ingestion and incremental synchronization.
+
+See the [full release notes](https://ragflow.io/docs/dev/release_notes) for more updates.
+
+## 🌟 Key Features
+
+### 🍭 **"Quality in, quality out"**
+
+- Deep document understanding-based knowledge extraction from unstructured data with complicated
+  formats.
+- Finds "needle in a data haystack" of literally unlimited tokens.
+
+### 🍱 **Template-based chunking**
+
+- Intelligent and explainable.
+- Plenty of template options to choose from.
+
+### 🧩 **Knowledge Compilation**
+
+- Compile content at the document and dataset levels into structured knowledge artifacts.
+- Use compilation templates to generate Wikis, Graphs, Trees, PageIndex, Mind Maps, Timelines, and Skills for different knowledge organization and reuse needs.
+- Configure compilation models and processing rules, and view, update, and regenerate knowledge artifacts.
+
+### 🧠 **Agentic Retrieval**
+
+- Perform multi-step retrieval for complex questions: the model analyzes the question and, when needed, breaks it down, retrieves knowledge, and verifies evidence.
+- Gather more complete context through multiple rounds of retrieval and reasoning to help generate well-grounded answers.
+- Choose Low, Medium, High, or Ultra thinking modes to control retrieval and reasoning depth according to question complexity.
+
+### 🌱 **Grounded citations with reduced hallucinations**
+
+- Visualization of text chunking to allow human intervention.
+- Quick view of the key references and traceable citations to support grounded answers.
+
+### 🍔 **Compatibility with heterogeneous data sources**
+
+- Supports Word documents, PowerPoint presentations, Excel spreadsheets, TXT files, images, PDFs, scanned copies, structured data, web pages, and more.
+
+### 🛀 **Automated and effortless RAG workflow**
+
+- Streamlined RAG orchestration catered to both personal and large businesses.
+- Configurable LLMs as well as embedding models.
+- Multiple recall paired with fused re-ranking.
+- Intuitive APIs for seamless integration with business.
+
+## 🔎 System Architecture
+
+<div align="center" style="margin-top:20px;margin-bottom:20px;">
+<img src="https://raw.githubusercontent.com/infiniflow/ragflow-docs/main/images/structure.jpg" alt="RAGFlow system architecture" width="1000" />
+</div>
+
+## 🏠 Local Deployment
+
+Local deployment supports both Docker deployment and launching from source. Docker is suitable for quick evaluation, integration testing, and production deployment, while launching from source is intended for RAGFlow development and debugging. Docker deployment does not require a Go compiler. Launching from source requires the Go version specified in `go.mod`; frontend development additionally requires Node.js and npm.
+
+### 🐳 Docker Deployment
+
+#### 📝 Docker Deployment Prerequisites
+
+- Recommended starting configuration: 4 CPU cores, 16 GB RAM, and 50 GB of available disk space. Actual requirements depend on the document engine, data volume, parsing tasks, and concurrency. Local models and other optional components may require additional resources.
+- Docker ≥ 24.0.0, Docker Compose ≥ v2.26.1.
+
+> [!TIP]
+> If you have not installed Docker on your local machine (Windows, macOS, or Linux), see [Install Docker Engine](https://docs.docker.com/engine/install/).
+
+#### 🚀 Start up the server
+
+1. If using Elasticsearch, set `vm.max_map_count` on the Docker host to at least 262144. This step is usually unnecessary with Infinity:
+
+   > To check the value of `vm.max_map_count`:
+   >
+   > 
+[Snapshot excerpt truncated here; not a complete upstream file.]

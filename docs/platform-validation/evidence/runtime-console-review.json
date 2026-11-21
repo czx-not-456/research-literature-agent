@@ -1,0 +1,28 @@
+{
+  "source": "User screenshots of AgentArts Runtime list and existing runtime detail",
+  "region": "cn-southwest-2",
+  "list_screenshot": "屏幕截图 2026-11-20 212801.png",
+  "detail_screenshot": "屏幕截图 2026-11-20 212900.png",
+  "list_heading": "智能体运行时 (1/1)",
+  "console_entry": "托管智能体",
+  "existing_runtime": {
+    "name": "managed-agent-huawei-cit",
+    "status": "正常",
+    "latest_version": "v2",
+    "artifact": "SWR image (truncated in UI)",
+    "execution_agency": "DefaultAgentArtsRuntimeAgency",
+    "ingress_gateway": "defaultgw",
+    "ingress_auth": "IAM",
+    "egress": "公网访问",
+    "cpu_millicores": 2000,
+    "memory_mib": 8192,
+    "listen_port": 18092
+  },
+  "unknown": [
+    "meaning of (1/1)",
+    "ability to create a second runtime",
+    "custom runtime creation form options",
+    "pricing and usage",
+    "permission for Runtime to call the separate Crossref MCP gateway"
+  ]
+}

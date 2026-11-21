@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.name if topic else '文献库' }}{% endblock %}
+{% block content %}
+{% if not topic %}
+<section class="welcome" aria-labelledby="welcome-title">
+  <p class="eyebrow">个人文献库</p>
+  <h1 id="welcome-title">为你的研究建一个课题</h1>
+  <p>创建课题后就可以导入论文、整理文献信息，或按 PDF 页码查找原文。</p>
+  <a class="button primary" href="#main" data-open-topic>创建第一个课题</a>
+</section>
+{% else %}
+<header class="pagehead">
+  <div>
+    <p class="eyebrow">课题文献库</p>
+    <h1>{{ topic.name }}</h1>
+    {% if topic.description %}<p class="description">{{ topic.description }}</p>{% endif %}
+  </div>
+  <details class="upload" {% if not documents and not query and not category %}open{% endif %}>
+    <summary class="button primary"><span aria-hidden="true">＋</span> 导入 PDF</summary>
+    <form method="post" action="{{ url_for('upload', topic_id=topic.id) }}" enctype="multipart/form-data" data-upload>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="pdf">选择一份 PDF</label>
+      <input type="file" name="pdf" id="pdf" accept=".pdf,application/pdf" required>
+      <p class="help">每份不超过 {{ max_mib }} MiB、{{ max_pages }} 页。</p>
+      <button type="submit" class="button primary">上传并解析</button>
+    </form>
+  </details>
+</header>
+<section class="sheet" aria-labelledby="papers-title">
+  <div class="sheet-head">
+    <div><h2 id="papers-title">文献</h2><p>{{ documents|length }} 篇{% if query or category %}符合筛选条件{% endif %}</p></div>
+    <form class="filters" method="get" action="{{ url_for('topic', topic_id=topic.id) }}" aria-label="搜索和筛选文献">
+      <label class="visually-hidden" for="q">关键词</label>
+      <input type="search" name="q" id="q" maxlength="200" value="{{ query }}" placeholder="搜索标题、DOI 或原文">
+      <label class="visually-hidden" for="category">分类</label>
+      <select name="category" id="category">
+        <option value="">全部分类</option>
+        {% for option in categories %}<option value="{{ option }}"{% if option == category %} selected{% endif %}>{{ option }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="button">搜索</button>
+      {% if query or category %}<a class="reset" href="{{ url_for('topic', topic_id=topic.id) }}">清除</a>{% endif %}
+    </form>
+  </div>
+  {% if documents %}
+  <ul class="document-list">
+    {% for item in documents %}
+    <li class="paper">
+      <div class="file-mark" aria-hidden="true">PDF</div>
+      <div class="paper-summary">
+        <h3><a href="{{ url_for('document', document_id=item.id, page=item.matching_page or 1) }}">{{ item.title }}</a></h3>
+        <div class="paper-meta">
+          {% if item.authors %}<span>{{ item.authors }}</span>{% endif %}
+          {% if item.year %}<span>{{ item.year }}</span>{% endif %}
+          <span>{{ item.page_count }} 页</span>
+          {% if item.category %}<span class="category">{{ item.category }}</span>{% endif %}
+          {% if not item.text_page_count %}<span class="text-warning">暂无页文本</span>{% endif %}
+        </div>
+        {% if item.abstract %}<p class="abstract-preview">{{ item.abstract|truncate(230, true, '…') }}</p>{% endif %}
+      </div>
+      <a class="paper-action" href="{{ url_for('document', document_id=item.id, page=item.matching_page or 1) }}">
+        {% if item.matching_page %}打开第 {{ item.matching_page }} 页{% else %}查看原文{% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty">
+    {% if query or category %}<h3>未找到匹配文献</h3><p>可以调整搜索词或清除筛选。</p>
+    {% else %}<h3>这个课题还没有文献</h3><p>上传一篇中英文 PDF，即可开始整理和查阅。</p>{% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,215 @@
+Source: https://github.com/assafelovic/gpt-researcher/blob/master/gpt_researcher/agent.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=29309
+
+1: """GPT Researcher agent module.
+2: 
+3: This module provides the main GPTResearcher class that orchestrates
+4: autonomous research and report generation using LLMs and web search.
+5: """
+6: 
+7: import json
+8: import os
+9: from typing import Any, Optional
+10: 
+11: from .actions import (
+12:     add_references,
+13:     choose_agent,
+14:     extract_headers,
+15:     extract_sections,
+16:     get_retrievers,
+17:     get_search_results,
+18:     table_of_contents,
+19: )
+20: from .config import Config
+21: from .llm_provider import GenericLLMProvider
+22: from .memory import Memory
+23: from .prompts import get_prompt_family
+24: from .skills.browser import BrowserManager
+25: from .skills.context_manager import ContextManager
+26: from .skills.curator import SourceCurator
+27: from .skills.deep_research import DeepResearchSkill
+28: from .skills.image_generator import ImageGenerator
+29: from .skills.researcher import ResearchConductor
+30: from .skills.writer import ReportGenerator
+31: from .utils.enum import ReportSource, ReportType, Tone
+32: from .utils.llm import create_chat_completion
+33: from .vector_store import VectorStoreWrapper
+34: 
+35: 
+36: class GPTResearcher:
+37:     """Main GPT Researcher agent class.
+38: 
+39:     This class orchestrates the entire research process including
+40:     web searching, content scraping, context management, and
+41:     report generation using LLMs.
+42: 
+43:     Attributes:
+44:         query: The research query or question.
+45:         report_type: Type of report to generate.
+46:         cfg: Configuration object.
+47:         context: Accumulated research context.
+48:         research_costs: Total accumulated API costs.
+49:         step_costs: Per-step cost breakdown dictionary.
+50:     """
+51: 
+52:     def __init__(
+53:         self,
+54:         query: str,
+55:         report_type: str = ReportType.ResearchReport.value,
+56:         report_format: str = "markdown",
+57:         report_source: str = ReportSource.Web.value,
+58:         tone: Tone = Tone.Objective,
+59:         source_urls: list[str] | None = None,
+60:         document_urls: list[str] | None = None,
+89:             report_type (str): Type of report to generate.
+90:             report_format (str): Format of the report (markdown, pdf, etc).
+91:             report_source (str): Source of information for the report (web, local, etc).
+92:             tone (Tone): Tone of the report.
+124:                 Example:
+125:                 ```python
+126:                 mcp_configs=[{
+127:                     "command": "python",
+128:                     "args": ["my_mcp_server.py"],
+129:                     "name": "search"
+201:     
+202:     def _generate_research_id(self) -> str:
+203:         """Generate a unique research ID for this session.
+204:         
+215: 
+216:     def _resolve_mcp_strategy(self, mcp_strategy: str | None, mcp_max_iterations: int | None) -> str:
+217:         """
+218:         Resolve MCP strategy from various sources with backwards compatibility.
+220:         Priority:
+221:         1. Parameter mcp_strategy (new approach)
+222:         2. Parameter mcp_max_iterations (backwards compatibility)  
+223:         3. Config MCP_STRATEGY
+224:         4. Default "fast"
+226:         Args:
+227:             mcp_strategy: New strategy parameter
+228:             mcp_max_iterations: Legacy parameter for backwards compatibility
+229:             
+230:         Returns:
+232:         """
+233:         # Priority 1: Use mcp_strategy parameter if provided
+234:         if mcp_strategy is not None:
+235:             # Support new strategy names
+240:                 import logging
+241:                 logging.getLogger(__name__).warning("mcp_strategy 'optimized' is deprecated, use 'fast' instead")
+242:                 return "fast"
+243:             elif mcp_strategy == "comprehensive":
+244:                 import logging
+245:                 logging.getLogger(__name__).warning("mcp_strategy 'comprehensive' is deprecated, use 'deep' instead")
+246:                 return "deep"
+247:             else:
+254:             import logging
+255:             logging.getLogger(__name__).warning("mcp_max_iterations is deprecated, use mcp_strategy instead")
+256:             
+257:             if mcp_max_iterations == 0:
+281: 
+282:     def _process_mcp_configs(self, mcp_configs: list[dict]) -> None:
+283:         """
+284:         Process MCP configurations from a list of configuration dictionaries.
+310: 
+311:     async def _log_event(self, event_type: str, **kwargs):
+312:         """Helper method to handle logging events"""
+313:         if self.log_handler:
+330: 
+331:     async def conduct_research(self, on_progress=None):
+332:         """Conduct the research process.
+333: 
+357:             await self._log_event("action", action="choose_agent")
+358:             # Filter out encoding parameter as it's not supported by LLM APIs
+359:             # filtered_kwargs = {k: v for k, v in self.kwargs.items() if k != 'encoding'}
+360:             self.agent, self.role = await choose_agent(
+402: 
+403:     async def _handle_deep_research(self, on_progress=None):
+404:         """Handle deep research execution and logging.
+405: 
+450: 
+451:     async def write_report(
+452:         self,
+453:         existing_headers: list = [],
+493: 
+494:     async def write_report_conclusion(self, report_body: str) -> str:
+495:         """Write the conclusion section of the report.
+496: 
+507: 
+508:     async def write_introduction(self) -> str:
+509:         """Write the introduction section of the report.
+510: 
+518: 
+519:     async def quick_search(self, query: str, query_domains: list[str] = None, aggregated_summary: bool = False) -> list[Any] | str:
+520:         """Perform a quick search without full research workflow.
+521: 
+552: 
+553:     async def get_subtopics(self):
+554:         """Generate subtopics for the research query.
+555: 
+560: 
+561:     async def get_draft_section_titles(self, current_subtopic: str) -> list[str]:
+562:         """Generate draft section titles for a subtopic.
+563: 
+571: 
+572:     async def get_similar_written_contents_by_draft_section_titles(
+573:         self,
+574:         current_subtopic: str,
+597:     # Utility methods
+598:     def get_research_images(self, top_k: int = 10) -> list[dict[str, Any]]:
+599:         """Get the top research images collected during research.
+600: 
+608: 
+609:     def add_research_images(self, images: list[dict[str, Any]]) -> None:
+610:         """Add images to the research image collection.
+611: 
+616: 
+617:     def get_research_sources(self) -> list[dict[str, Any]]:
+618:         """Get all research sources collected during research.
+619: 
+624: 
+625:     def add_research_sources(self, sources: list[dict[str, Any]]) -> None:
+626:         """Add sources to the research source collection.
+627: 
+632: 
+633:     def add_references(self, report_markdown: str, visited_urls: set) -> str:
+634:         """Add reference section to a markdown report.
+635: 
+644: 
+645:     def extract_headers(self, markdown_text: str) -> list[dict]:
+646:         """Extract headers from markdown text.
+647: 
+655: 
+656:     def extract_sections(self, markdown_text: str) -> list[dict]:
+657:         """Extract sections from markdown text.
+658: 
+666: 
+667:     def table_of_contents(self, markdown_text: str) -> str:
+668:         """Generate a table of contents for markdown text.
+669: 
+677: 
+678:     def get_source_urls(self) -> list:
+679:         """Get all visited source URLs.
+680: 
+685: 
+686:     def get_research_context(self) -> list:
+687:         """Get the accumulated research context.
+688: 
+693: 
+694:     def get_costs(self) -> float:
+695:         """Get the total accumulated API costs.
+696: 
+697:         Returns:
+701: 
+702:     def get_step_costs(self) -> dict[str, float]:
+703:         """Get a breakdown of API costs per research step.
+704: 
+705:         Returns:
+709: 
+710:     def set_verbose(self, verbose: bool) -> None:
+711:         """Set the verbose output mode.
+712: 
+717: 
+718:     def add_costs(self, cost: float) -> None:
+719:         """Add to the accumulated API costs.
+720: 
+721:         The cost is attributed to the current step set via ``_current_step``.

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "maas-openai-api",
+    "url": "https://support.huaweicloud.com/model-call-maas/model-call-021.html",
+    "utc": "2026-11-17T12:46:43.804536+00:00",
+    "status": 200,
+    "final_url": "https://support.huaweicloud.com/model-call-maas/model-call-021.html",
+    "bytes": 2190,
+    "sha256": "fe263b6244538f0529f76ea1c79a51bbb3415ff690e4cef2ee24d2530c105460",
+    "content_status": "security_challenge",
+    "text_preview": "Security Verification\nProtected by Tencent Cloud EdgeOne"
+  },
+  {
+    "name": "maas-standard-v2",
+    "url": "https://support.huaweicloud.com/model-call-maas/model-call-019.html",
+    "utc": "2026-11-17T12:46:43.806536+00:00",
+    "status": 200,
+    "final_url": "https://support.huaweicloud.com/model-call-maas/model-call-019.html",
+    "bytes": 2189,
+    "sha256": "840fdf778700f12bce52952bf6c2e3ccc5c3a4813dea92ed2e3d43707ae1ad07",
+    "content_status": "security_challenge",
+    "text_preview": "Security Verification\nProtected by Tencent Cloud EdgeOne"
+  },
+  {
+    "name": "maas-call-spec",
+    "url": "https://support.huaweicloud.com/model-call-maas/model-call-017.html",
+    "utc": "2026-11-17T12:46:43.807535+00:00",
+    "status": 200,
+    "final_url": "https://support.huaweicloud.com/model-call-maas/model-call-017.html",
+    "bytes": 2189,
+    "sha256": "9237f16c303022176fc9e28ae62e6f5524e7ad5c58095f915aa219325d3ea346",
+    "content_status": "security_challenge",
+    "text_preview": "Security Verification\nProtected by Tencent Cloud EdgeOne"
+  }
+]

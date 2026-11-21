@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ entry.title }}{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id) }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead document-head">
+  <div>
+    <p class="eyebrow">文献详情</p>
+    <h1>{{ entry.title }}</h1>
+    <div class="paper-meta">
+      {% if entry.authors %}<span>{{ entry.authors }}</span>{% endif %}
+      {% if entry.year %}<span>{{ entry.year }}</span>{% endif %}
+      {% if entry.category %}<span class="category">{{ entry.category }}</span>{% endif %}
+      <span>{{ entry.text_page_count }} / {{ entry.page_count }} 页有可提取文本</span>
+    </div>
+    <p class="help">{{ entry.filename }}{% if entry.doi %} · DOI {{ entry.doi }}{% endif %}</p>
+  </div>
+</header>
+<section class="sheet reader" aria-labelledby="reader-title">
+  <div class="sheet-head reader-head">
+    <div><h2 id="reader-title">原文与页文本</h2><p>页码按 PDF 文件顺序计算。</p></div>
+    <nav class="pager" aria-label="PDF 翻页">
+      {% if page.number > 1 %}<a class="button" href="{{ url_for('document', document_id=entry.id, page=page.number - 1) }}">上一页</a>
+      {% else %}<button class="button" type="button" disabled>上一页</button>{% endif %}
+      <form method="get" action="{{ url_for('document', document_id=entry.id) }}">
+        <label class="visually-hidden" for="page">页码</label>
+        <input id="page" name="page" type="number" min="1" max="{{ entry.page_count }}" value="{{ page.number }}" required>
+        <span aria-hidden="true">/ {{ entry.page_count }}</span><button class="button" type="submit">跳转</button>
+      </form>
+      {% if page.number < entry.page_count %}<a class="button" href="{{ url_for('document', document_id=entry.id, page=page.number + 1) }}">下一页</a>
+      {% else %}<button class="button" type="button" disabled>下一页</button>{% endif %}
+    </nav>
+  </div>
+  <div class="reading-grid">
+    <div class="pdf-pane">
+      <div class="panel-head"><h3>PDF 原件</h3>
+        <a href="{{ url_for('pdf', document_id=entry.id) }}#page={{ page.number }}" target="_blank" rel="noopener">在新标签页打开</a>
+      </div>
+      <div class="page-preview">
+        <img data-pdf-preview src="{{ url_for('preview', document_id=entry.id, number=page.number) }}"
+             alt="PDF 原件第 {{ page.number }} 页">
+        <p class="no-text" data-preview-error hidden>本页预览无法加载。可在新标签页打开 PDF 原件。</p>
+      </div>
+    </div>
+    <div class="text-pane">
+      <div class="panel-head"><h3>第 {{ page.number }} 页文本</h3><span>{{ page_status[page.status] }}</span></div>
+      {% if page.text %}<pre tabindex="0">{{ page.text }}</pre>
+      {% else %}<p class="no-text">可以使用左侧 PDF 核对本页。扫描页通常需要 OCR 才能提取文本。</p>{% endif %}
+    </div>
+  </div>
+</section>
+<section class="sheet metadata" id="metadata" aria-labelledby="metadata-title">
+  <div class="sheet-head"><div><h2 id="metadata-title">文献信息</h2><p>自动识别的内容供核对。缺失信息可留空。</p></div></div>
+  <form class="metadata-form" action="{{ url_for('edit_document', document_id=entry.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="page" value="{{ page.number }}">
+    {% for name, label in [('title','标题'),('authors','作者'),('year','发表年份'),('doi','DOI'),('keywords','关键词'),('category','分类'),('abstract','摘要')] %}
+    <label class="{% if name in ('title','abstract') %}full{% endif %}" for="{{ name }}">
+      <span class="field-caption">{{ label }}{% if entry.sources.get(name) and entry[name] %}<small>{{ field_sources[entry.sources[name]] }}</small>{% endif %}</span>
+      {% if name == 'abstract' %}
+      <textarea id="{{ name }}" name="{{ name }}" rows="4" maxlength="{{ field_limits[name] }}">{{ entry[name] }}</textarea>
+      {% else %}
+      <input id="{{ name }}" name="{{ name }}" value="{{ entry[name] }}" maxlength="{{ field_limits[name] }}"
+        {% if name == 'title' %}required{% endif %}{% if name == 'year' %}inputmode="numeric" pattern="[0-9]{4}"{% endif %}
+        {% if name == 'category' %}placeholder="例如：检索方法"{% endif %}>
+      {% endif %}
+    </label>
+    {% endfor %}
+    <div class="full"><button class="button primary" type="submit">保存文献信息</button></div>
+  </form>
+  <details class="delete">
+    <summary>删除文献</summary>
+    <form method="post" action="{{ url_for('delete_document', document_id=entry.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <p>将从本课题移除 PDF 和全部页文本。</p>
+      <button class="button danger" type="submit">确认删除</button>
+    </form>
+  </details>
+</section>
+{% endblock %}

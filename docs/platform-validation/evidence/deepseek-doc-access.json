@@ -1,0 +1,35 @@
+[
+  {
+    "name": "deepseek-current-start",
+    "url": "https://api-docs.deepseek.com/",
+    "utc": "2026-11-17T12:52:27.923622+00:00",
+    "status": 200,
+    "final_url": "https://api-docs.deepseek.com/",
+    "bytes": 51258,
+    "sha256": "b461c4d1c99e51f8d42a650d18a4c7688bcab835f0480ae389e87ca666b6a6c8",
+    "content_status": "needs_content_review",
+    "text_preview": "Your First API Call | DeepSeek API Docs\nSkip to main content\nThe full suite of DeepSeek application APIs is now available: web search, file input, URL reading, model safety, ASR, TTS and more.\nClick here to view the guide\nDeepSeek API Docs\nResources\nIntegrations\nAPI Status\nFAQ\nEnglish\nEnglish\n中文（中国）\nDeepSeek Platform\n中\nQuick Start\nAPI Guides\nAPI Reference\nNews\nChange Log\nYour First API Call\nModels & Pricing\nToken & Token Usage\nRate Limit & Isolation\nError Codes\nAgent Integrations\nDeepSeek Harness\nClaude Code\nCodex\nOpenCode\nOpenClaw\nHermes\nReasonix\nWorkBuddy/CodeBuddy\nQoder\nContribute Your Agent Integrations\nYour First API Call\nOn this page\nCopy Markdown\nCopy Markdown\nOpen Markdown\nYour First API Call\nThe DeepSeek API uses an API format compatible with OpenAI/Anthropic. By modifying the configuration, you can use the OpenAI/Anthropic SDK or softwares compatible with the OpenAI/Anthropic API to access the DeepSeek API.\nPARAM\nVALUE\nbase_url (OpenAI)\nhttps://api.deepseek.com\nbase_url (Anthropic)\nhttps://api.deepseek.com/anthropic\napi_key\napply for an\nAPI key\nmodel\ndeepseek-flash\n(1)\ndeepseek-v4-pro\n(1) Use\ndeepseek-flash\nas the model name. It is now served by DeepSeek-V4.1-Flash-1017, and the calling method remains unchanged. The legacy names\ndeepseek-v4-flash\nand\ndeepseek-v4-flash-vision-exp\nare still accepted, but the corresponding models have been retired; their requests are served by DeepSeek-V4.1-Flash-1017 and billed at the Flash price.\nIntegrate with Agent Tools\n​\nDeepSeek Harness is now in developer preview for agent harness developers worldwide. See the\nDeepSeek Harnes"
+  },
+  {
+    "name": "deepseek-current-pricing",
+    "url": "https://api-docs.deepseek.com/quick_start/pricing",
+    "utc": "2026-11-17T12:52:27.924615+00:00",
+    "status": 200,
+    "final_url": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "bytes": 29133,
+    "sha256": "5efd7e7661de5b86a1a3d5569ea5d9d8633bf1ca1c311ec42baace85ef18d78e",
+    "content_status": "needs_content_review",
+    "text_preview": "Models & Pricing | DeepSeek API Docs\nSkip to main content\nThe full suite of DeepSeek application APIs is now available: web search, file input, URL reading, model safety, ASR, TTS and more.\nClick here to view the guide\nDeepSeek API Docs\nResources\nIntegrations\nAPI Status\nFAQ\nEnglish\nEnglish\n中文（中国）\nDeepSeek Platform\n中\nQuick Start\nAPI Guides\nAPI Reference\nNews\nChange Log\nYour First API Call\nModels & Pricing\nToken & Token Usage\nRate Limit & Isolation\nError Codes\nAgent Integrations\nDeepSeek Harness\nClaude Code\nCodex\nOpenCode\nOpenClaw\nHermes\nReasonix\nWorkBuddy/CodeBuddy\nQoder\nContribute Your Agent Integrations\nModels & Pricing\nOn this page\nCopy Markdown\nCopy Markdown\nOpen Markdown\nModels & Pricing\nModel prices are listed in units of per 1M tokens. A token, the smallest unit of text that the model recognizes, can be a word, a number, or even a punctuation mark. We bill model usage based on the total number of input and output tokens by the model.\nModel Details\n​\nMODEL\ndeepseek-flash\n(1)\ndeepseek-v4-pro\nBASE URL (OpenAI Format)\nhttps://api.deepseek.com\nBASE URL (Anthropic Format)\nhttps://api.deepseek.com/anthropic\nMODEL VERSION\nDeepSeek-V4.1-Flash-1017\nDeepSeek-V4-Pro-0813\nTHINKING MODE\nSupports both non-thinking and thinking (default) modes\nSee\nThinking Mode\nfor how to switch\nCONTEXT LENGTH\n1M\nMAX OUTPUT\nMAXIMUM: 384K\nFEATURES\nJson Output\n✓\n✓\nTool Calls\n✓\n✓\nResponses API\n✓\n✓\nAnthropic API\n✓\n✓\nChat Prefix Completion（Beta）\n✓\n✓\nFIM Completion（Beta）\nNon-thinking mode only\nNon-thinking mode only\nVision\n✓\nNot supported\nPRICING\n(2)\n1M INPUT TOKENS\n(CACHE HIT)\nOFF-PEAK\n$0.003\n$0.022\nPEAK\n"
+  },
+  {
+    "name": "deepseek-current-tools",
+    "url": "https://api-docs.deepseek.com/guides/tool_calls",
+    "utc": "2026-11-17T12:52:27.924615+00:00",
+    "status": 200,
+    "final_url": "https://api-docs.deepseek.com/guides/tool_calls/",
+    "bytes": 78573,
+    "sha256": "9695cadf3c00ddff6151b3eebf2b80b7957ce1126e38b6711ae3ff2753b2ec4c",
+    "content_status": "needs_content_review",
+    "text_preview": "Tool Calls | DeepSeek API Docs\nSkip to main content\nThe full suite of DeepSeek application APIs is now available: web search, file input, URL reading, model safety, ASR, TTS and more.\nClick here to view the guide\nDeepSeek API Docs\nResources\nIntegrations\nAPI Status\nFAQ\nEnglish\nEnglish\n中文（中国）\nDeepSeek Platform\n中\nQuick Start\nAPI Guides\nAPI Reference\nNews\nChange Log\nModel Capabilities\nThinking Mode\nMulti-round Conversation\nChat Prefix Completion (Beta)\nFIM Completion (Beta)\nJSON Output\nTool Calls\nContext Caching\nVision\nFiles API\nTool APIs\nSearch & Fetch\nOCR\nText to Speech\nSpeech to Text\nBuild a Chatbot\nOverview\nWeb Tools\nFile Parsing\nConversation Title\nUser Metadata Marker\nModel Content Safety\nProtocols\nUsing the Responses API\nUsing the Anthropic API\nModel Capabilities\nTool Calls\nOn this page\nCopy Markdown\nCopy Markdown\nOpen Markdown\nTool Calls\nTool Calls allows the model to call external tools to enhance its capabilities.\nNon-thinking Mode\n​\nSample Code\n​\nHere is an example of using Tool Calls to get the current weather information of the user's location, demonstrated with complete Python code.\nFor the specific API format of Tool Calls, please refer to the\nChat Completion\ndocumentation.\nfrom\nopenai\nimport\nOpenAI\ndef\nsend_messages\n(\nmessages\n)\n:\nresponse\n=\nclient\n.\nchat\n.\ncompletions\n.\ncreate\n(\nmodel\n=\n\"deepseek-flash\"\n,\nmessages\n=\nmessages\n,\ntools\n=\ntools\n,\nextra_body\n=\n{\n\"thinking\"\n:\n{\n\"type\"\n:\n\"disabled\"\n}\n}\n,\n)\nreturn\nresponse\n.\nchoices\n[\n0\n]\n.\nmessage\nclient\n=\nOpenAI\n(\napi_key\n=\n\"<your api key>\"\n,\nbase_url\n=\n\"https://api.deepseek.com\"\n,\n)\ntools\n=\n[\n{\n\"type\"\n:\n\"function\"\n,\n"
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-21",
+  "scope": "Local library MVP; no cloud deployment",
+  "platform": "Windows 11, Python 3.12.4, Chrome and SQLite",
+  "checks": {
+    "integration_tests": 6,
+    "failed": 0,
+    "generated_fixtures": [
+      "Chinese text PDF (2 pages)",
+      "English text PDF (2 pages)",
+      "textless PDF",
+      "encrypted PDF",
+      "title with attribution notice and multi-line heading"
+    ],
+    "browser": [
+      "desktop topic library",
+      "desktop page 2 reader",
+      "narrow-width topic library"
+    ],
+    "real_paper": {
+      "url": "https://arxiv.org/pdf/1706.03762",
+      "title": "Attention Is All You Need",
+      "pages": 15,
+      "page_2_text": "available",
+      "doi_left_blank": true,
+      "abstract_excluded_footnote": true
+    }
+  },
+  "screenshots": [
+    "library-desktop.png",
+    "reader-desktop.png",
+    "library-mobile.png"
+  ]
+}

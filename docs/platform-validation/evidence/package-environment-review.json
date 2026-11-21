@@ -1,0 +1,40 @@
+{
+  "reviewed_utc": "2026-11-17T10:11:36.279950+00:00",
+  "method": "direct visual inspection; original images unchanged",
+  "sources": [
+    {
+      "file": "屏幕截图 2026-11-17 175952.png",
+      "bytes": 271584,
+      "sha256": "96863078cbfa9a881fe48caefb0a363bb20b7d8af2b54b698db08ab2fe36ddf2"
+    },
+    {
+      "file": "屏幕截图 2026-11-17 180026.png",
+      "bytes": 294037,
+      "sha256": "a1fc717e50b40d7caf7b504dfd77f7b0f15ba222e2408a2c6aff8b72249f0065"
+    }
+  ],
+  "model_page": {
+    "package_notice": "您当前暂未购买任何套餐，暂时无法使用相关功能",
+    "free_trial_entry_visible": true,
+    "provider_empty_state_visible": true,
+    "add_provider_button_greyed": true
+  },
+  "environment_page": {
+    "network_scope": "outbound",
+    "public_access_selected": true,
+    "private_access_option_visible": true,
+    "session_storage_unchecked": true,
+    "session_storage_nonremovable_after_configuration_notice": true,
+    "sfs_turbo_and_obs_greyed": true,
+    "create_price_label": "限时免费"
+  },
+  "not_verified": [
+    "trial eligibility",
+    "trial entitlement",
+    "billing scope",
+    "beta approval",
+    "model provider configuration",
+    "environment creation",
+    "platform runtime or API calls"
+  ]
+}

@@ -1,0 +1,211 @@
+Source: https://github.com/docling-project/docling/blob/main/docling/document_converter.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=43813
+
+1: # SPDX-FileCopyrightText: The Docling Contributors
+2: # SPDX-License-Identifier: MIT
+3: 
+4: import logging
+5: import sys
+6: import threading
+7: import time
+8: import warnings
+9: from collections.abc import Iterable, Iterator
+10: from concurrent.futures import ThreadPoolExecutor
+11: from datetime import datetime
+12: from functools import partial
+13: from io import BytesIO
+14: from pathlib import Path
+15: from typing import Optional, Type, Union
+16: 
+17: from docling_core.types.doc.page import TextCellUnit
+18: from pydantic import (
+19:     AnyHttpUrl,
+20:     ConfigDict,
+21:     Field,
+22:     TypeAdapter,
+23:     ValidationError,
+24:     model_validator,
+25:     validate_call,
+26: )
+27: from typing_extensions import Self
+28: 
+29: from docling.backend.abstract_backend import (
+30:     AbstractDocumentBackend,
+31: )
+32: from docling.backend.afp_backend import AfpDocumentBackend
+33: from docling.backend.asciidoc_backend import AsciiDocBackend
+34: from docling.backend.boxnote_backend import BoxNoteDocumentBackend
+35: from docling.backend.calendar_backend import CalendarDocumentBackend
+36: from docling.backend.csv_backend import CsvDocumentBackend
+37: from docling.backend.docling_parse_backend import (
+38:     ThreadedDoclingParseDocumentBackend,
+39: )
+40: from docling.backend.ebcdic_backend import EbcdicDocumentBackend
+41: from docling.backend.email_backend import EmailDocumentBackend
+42: from docling.backend.epub_backend import EpubDocumentBackend
+43: from docling.backend.html_backend import HTMLDocumentBackend
+44: from docling.backend.image_backend import ImageDocumentBackend
+45: from docling.backend.iwork_backend import (
+46:     IWorkKeynoteDocumentBackend,
+47:     IWorkNumbersDocumentBackend,
+48:     IWorkPagesDocumentBackend,
+49: )
+50: from docling.backend.json.docling_json_backend import DoclingJSONBackend
+51: from docling.backend.latex_backend import LatexDocumentBackend
+52: from docling.backend.md_backend import MarkdownDocumentBackend
+53: from docling.backend.mets_gbs_backend import MetsGbsDocumentBackend
+54: from docling.backend.msexcel_backend import MsExcelDocumentBackend
+55: from docling.backend.mspowerpoint_backend import MsPowerpointDocumentBackend
+56: from docling.backend.msword_backend import MsWordDocumentBackend
+57: from docling.backend.noop_backend import NoOpBackend
+58: from docling.backend.opendocument_backend import (
+59:     OdpDocumentBackend,
+60:     OdsDocumentBackend,
+82:     MarkdownBackendOptions,
+83:     MetsGbsBackendOptions,
+84:     MsWordBackendOptions,
+85:     PdfBackendOptions,
+86:     ThreadedDoclingParseBackendOptions,
+87:     XBRLBackendOptions,
+107:     ConvertPipelineOptions,
+108:     NativePdfPipelineOptions,
+109:     PdfPipelineOptions,
+110:     PipelineOptions,
+111: )
+117: from docling.datamodel.settings import (
+118:     DEFAULT_PAGE_RANGE,
+119:     DocumentLimits,
+120:     PageRange,
+121:     settings,
+122: )
+125: from docling.pipeline.base_pipeline import BasePipeline
+126: from docling.pipeline.native_pdf_pipeline import NativePdfPipeline
+127: from docling.pipeline.simple_pipeline import SimplePipeline
+128: from docling.pipeline.standard_pdf_pipeline import StandardPdfPipeline
+129: from docling.pipeline.video_pipeline import VideoPipeline
+130: from docling.utils.pipeline_cache import create_pipeline_options_hash
+141: 
+142:     def backend_options_for_input(
+143:         self, source: Path | str | DocumentStream
+144:     ) -> BackendOptions | None:
+147:     @model_validator(mode="after")
+148:     def set_optional_field_default(self) -> Self:
+149:         if self.pipeline_options is None:
+150:             self.pipeline_options = self.pipeline_cls.get_default_options()
+201: 
+202:     def backend_options_for_input(
+203:         self, source: Path | str | DocumentStream
+204:     ) -> MarkdownBackendOptions | None:
+222: 
+223:     def backend_options_for_input(
+224:         self, source: Path | str | DocumentStream
+225:     ) -> AsciiDocBackendOptions | None:
+243: 
+244:     def backend_options_for_input(
+245:         self, source: Path | str | DocumentStream
+246:     ) -> HTMLBackendOptions | None:
+305: 
+306:     def backend_options_for_input(
+307:         self, source: Path | str | DocumentStream
+308:     ) -> XBRLBackendOptions | None:
+323:         try:
+324:             TypeAdapter(AnyHttpUrl).validate_python(source)
+325:         except ValidationError:
+326:             return options
+338: class ImageFormatOption(FormatOption):
+339:     pipeline_cls: Type = StandardPdfPipeline
+340:     backend: Type[AbstractDocumentBackend] = ImageDocumentBackend
+341: 
+342: 
+343: class PdfFormatOption(FormatOption):
+344:     pipeline_cls: Type = StandardPdfPipeline
+345:     backend: Type[AbstractDocumentBackend] = ThreadedDoclingParseDocumentBackend
+346:     backend_options: Optional[PdfBackendOptions] = None
+347: 
+348:     @model_validator(mode="after")
+349:     def configure_embedded_picture_images(self) -> Self:
+350:         if (
+351:             isinstance(self.pipeline_options, PdfPipelineOptions)
+352:             and self.pipeline_options.use_embedded_picture_images
+353:             and self.backend is ThreadedDoclingParseDocumentBackend
+358:                 )
+359:             elif isinstance(self.backend_options, PdfBackendOptions):
+360:                 self.backend_options.include_bitmap_images = True
+361:         return self
+363: 
+364: class IWorkPagesFormatOption(FormatOption):
+365:     """Format option for Apple Pages input."""
+366: 
+367:     pipeline_cls: Type = SimplePipeline
+368:     backend: Type[AbstractDocumentBackend] = IWorkPagesDocumentBackend
+369:     backend_options: IWorkBackendOptions | None = None
+370: 
+387: 
+388: class NativePdfFormatOption(PdfFormatOption):
+389:     """PDF format option for the model-free `NativePdfPipeline`.
+390: 
+391:     Defaults to the threaded docling-parse backend, configured from the pipeline
+392:     options: it parses with `parser_threads` threads, only decodes the embedded
+393:     bitmaps and only renders page images when the pipeline asks for them.
+394:     """
+395: 
+396:     pipeline_cls: Type = NativePdfPipeline
+397:     backend: Type[AbstractDocumentBackend] = ThreadedDoclingParseDocumentBackend
+398: 
+399:     @model_validator(mode="after")
+400:     def configure_backend_options(self) -> Self:
+401:         if not isinstance(self.pipeline_options, NativePdfPipelineOptions):
+402:             return self
+403: 
+407:                 include_bitmap_images=self.pipeline_options.generate_picture_images,
+408:                 render_pages=self.pipeline_options.generate_page_images,
+409:                 render_scale=self.pipeline_options.images_scale,
+410:             )
+421: 
+422: class MetsGbsFormatOption(FormatOption):
+423:     pipeline_cls: Type = StandardPdfPipeline
+424:     backend: Type[AbstractDocumentBackend] = MetsGbsDocumentBackend
+425:     backend_options: MetsGbsBackendOptions | None = None
+426: 
+427: 
+446: 
+447:     def backend_options_for_input(
+448:         self, source: Path | str | DocumentStream
+449:     ) -> LatexBackendOptions | None:
+463:         try:
+464:             TypeAdapter(AnyHttpUrl).validate_python(source)
+465:         except ValidationError:
+466:             base = options.model_dump() if options is not None else {}
+501: 
+502: def _get_default_option(format: InputFormat) -> FormatOption:
+503:     format_to_default_options = {
+504:         InputFormat.CSV: CsvFormatOption(),
+524:         InputFormat.XML_XBRL: XBRLFormatOption(),
+525:         InputFormat.METS_GBS: FormatOption(
+526:             pipeline_cls=StandardPdfPipeline, backend=MetsGbsDocumentBackend
+527:         ),
+528:         InputFormat.IMAGE: ImageFormatOption(),
+529:         InputFormat.PDF: PdfFormatOption(),
+530:         InputFormat.JSON_DOCLING: DoclingJSONFormatOption(),
+531:         InputFormat.AUDIO: AudioFormatOption(),
+538:         InputFormat.EPUB: EpubFormatOption(),
+539:         InputFormat.IWORK_PAGES: IWorkPagesFormatOption(),
+540:         InputFormat.IWORK_KEYNOTE: IWorkKeynoteFormatOption(),
+541:         InputFormat.IWORK_NUMBERS: IWorkNumbersFormatOption(),
+555:     `DocumentConverter` is the main entry point for converting documents in Docling.
+556:     It handles various input formats (PDF, DOCX, PPTX, images, HTML, Markdown, etc.)
+557:     and provides both single-document and batch conversion capabilities.
+558: 
+560:     which wraps a `DoclingDocument` object if the conversion was successful, along
+561:     with metadata about the conversion process.
+562: 
+563:     Attributes:
+571: 
+572:     def __init__(
+573:         self,
+574:         allowed_formats: Optional[list[InputFormat]] = None,
+587:                 document start and end for every input, pipeline phases, and
+588:                 page and enrichment-item counts where they apply. It receives
+589:        
+[Snapshot excerpt truncated here; not a complete upstream file.]

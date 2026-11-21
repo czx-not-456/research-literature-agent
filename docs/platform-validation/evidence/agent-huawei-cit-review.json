@@ -1,0 +1,27 @@
+{
+  "reviewed_utc": "2026-11-18T08:26:56.274010+00:00",
+  "source_file": "agent-huawei-cit.png",
+  "sha256": "6c5d6c33db9e9ad6e5a1c13923b0856f569a9e309ace52484d87de7e62886cc7",
+  "observed": {
+    "name": "agent-huawei-cit",
+    "id_from_explicit_id_field": "7d00eebf-18eb-40ed-8818-3370096ef391",
+    "region": "西南-贵阳一",
+    "provider": "deepseek-provider",
+    "model_name": "deepseek-flash",
+    "environment": "environment-huawei-cit",
+    "builtin_tools_counter": "0/8",
+    "skills_counter": "0/50",
+    "prompt_display": "--",
+    "access_domain": "truncated_not_reconstructed",
+    "visible_controls": [
+      "编辑",
+      "Playground",
+      "版本",
+      "日志",
+      "访问域名复制"
+    ]
+  },
+  "scope": "Agent detail/configuration evidence only; no invocation or tool execution shown",
+  "previous_playground_agent": "agent-tg2vc3r0; success not reassigned to this agent",
+  "credentials_read": false
+}

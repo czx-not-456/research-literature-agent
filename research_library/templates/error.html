@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}无法完成请求{% endblock %}
+{% block content %}
+<section class="welcome">
+  <p class="eyebrow">{{ code }}</p>
+  <h1>无法完成请求</h1>
+  <p>{{ message }}</p>
+  <a class="button primary" href="{{ url_for('home') }}">返回文献库</a>
+</section>
+{% endblock %}

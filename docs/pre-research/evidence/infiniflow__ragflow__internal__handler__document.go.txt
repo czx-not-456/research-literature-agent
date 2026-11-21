@@ -1,0 +1,173 @@
+Source: https://github.com/infiniflow/ragflow/blob/main/internal/handler/document.go
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=65190
+
+1: //
+2: //  Copyright 2026 The InfiniFlow Authors. All Rights Reserved.
+3: //
+4: //  Licensed under the Apache License, Version 2.0 (the "License");
+5: //  you may not use this file except in compliance with the License.
+6: //  You may obtain a copy of the License at
+7: //
+8: //      http://www.apache.org/licenses/LICENSE-2.0
+9: //
+10: //  Unless required by applicable law or agreed to in writing, software
+11: //  distributed under the License is distributed on an "AS IS" BASIS,
+12: //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+13: //  See the License for the specific language governing permissions and
+14: //  limitations under the License.
+15: //
+16: 
+17: package handler
+18: 
+19: import (
+20: 	"bytes"
+21: 	"context"
+22: 	"encoding/json"
+23: 	"errors"
+24: 	"fmt"
+25: 	"io"
+26: 	"mime/multipart"
+27: 	"net/http"
+28: 	"net/url"
+29: 	"ragflow/internal/common"
+30: 	"ragflow/internal/entity"
+31: 	"ragflow/internal/permission"
+32: 	"ragflow/internal/utility"
+33: 	"reflect"
+34: 	"strconv"
+35: 	"strings"
+36: 	"time"
+37: 
+38: 	"github.com/gin-gonic/gin"
+39: 	"go.uber.org/zap"
+40: 
+41: 	"ragflow/internal/dao"
+42: 	"ragflow/internal/service"
+43: 	"ragflow/internal/service/billing"
+44: 	"ragflow/internal/service/dataset"
+45: 	"ragflow/internal/service/document"
+46: )
+47: 
+48: var IMG_BASE64_PREFIX = "data:image/png;base64,"
+49: 
+50: // documentServiceIface defines the DocumentService methods used by DocumentHandler.
+51: type documentServiceIface interface {
+52: 	GetDocumentByID(ctx context.Context, id string) (*document.DocumentResponse, error)
+53: 	UpdateDocument(ctx context.Context, id string, req *document.UpdateDocumentRequest) (common.ErrorCode, error)
+54: 	DeleteDocument(ctx context.Context, id string) error
+55: 	DeleteDocuments(ctx context.Context, ids []string, deleteAll bool, datasetID string) (int, error)
+56: 	ParseDocuments(ctx context.Context, datasetID string, docIDs []string) ([]*service.ParseDocumentResponse, error)
+57: 	StopParseDocuments(ctx context.Context, datasetID string, docIDs []string) (map[string]interface{}, error)
+58: 	StopParseDocumentsAll(ctx context.Context, datasetID string, runStatuses []string) (map[string]interface{}, error)
+59: 	ListDocuments(ctx context.Context, page, pageSize int) ([]*document.DocumentResponse, int64, error)
+60: 	ListDocumentsByDatasetID(ctx context.Context, kbID, keywords string, page, pageSize int) ([]*entity.DocumentListItem, int64, error)
+61: 	ListDocumentsByDatasetIDWithOptions(ctx context.Context, opts dao.DocumentListOptions, page, pageSize int) ([]*entity.DocumentListItem, int64, error)
+62: 	ListDocumentIDsByDatasetIDWithOptions(ctx context.Context, opts dao.DocumentListOptions) ([]string, error)
+63: 	GetDocumentFiltersByDatasetID(ctx context.Context, opts dao.DocumentListOptions) (map[string]interface{}, int64, error)
+64: 	GetMetadataByKBs(ctx context.Context, kbIDs []string) (map[string]interface{}, error)
+65: 	GetDocumentsByAuthorID(ctx context.Context, authorID, page, pageSize int) ([]*document.DocumentResponse, int64, error)
+66: 	GetThumbnails(ctx context.Context, docIDs []string) (map[string]string, error)
+67: 	GetDocumentImage(ctx context.Context, imageID string) ([]byte, error)
+69: 	GetDocumentThumbnail(ctx context.Context, docID string) ([]byte, error)
+70: 	GetMetadataSummary(ctx context.Context, kbID string, docIDs []string) (map[string]interface{}, error)
+71: 	GetDocumentMetadataByID(ctx context.Context, docID string) (map[string]interface{}, error)
+72: 	GetDocumentArtifact(ctx context.Context, filename string) (*document.ArtifactResponse, error)
+73: 	GetDocumentPreview(ctx context.Context, docID string) (*document.DocumentPreview, error)
+79: 	ApplyDatasetParserConfig(ctx context.Context, datasetID string) (*document.ApplyDatasetParserConfigResponse, common.ErrorCode, error)
+80: 	BatchUpdateDocumentMetadatas(ctx context.Context, datasetID string, selector *document.MetadataSelector, updates []document.MetadataUpdate, deletes []document.MetadataDelete) (*document.BatchUpdateMetadatasResponse, common.ErrorCode, error)
+81: 	ListIngestionTasks(ctx context.Context, datasetID *string, page, pageSize int) ([]*entity.IngestionTask, error)
+82: 	IngestDocuments(ctx context.Context, datasetID string, docIDs []string) ([]*service.ParseDocumentResponse, error)
+83: 	StopIngestionTasks(ctx context.Context, tasks []string) ([]*entity.IngestionTask, error)
+107: // NewDocumentHandler create document handler
+108: func NewDocumentHandler(documentService documentServiceIface, datasetService *dataset.DatasetService, fileService fileUploadIface) *DocumentHandler {
+109: 	return &DocumentHandler{
+110: 		documentService: documentService,
+119: // @Tags documents
+120: // @Param id path int true "document ID"
+121: // @Success 200 {object} map[string]interface{}
+122: // @Router /api/v1/documents/{id} [get]
+123: func (h *DocumentHandler) GetDocumentByID(c *gin.Context) {
+124: 
+125: 	id := c.Param("id")
+126: 	if id == "" {
+127: 		common.RespondError(c, common.CodeBadRequest, "invalid document id")
+150: // GetThumbnail Get thumbnails for documents.
+151: func (h *DocumentHandler) GetThumbnail(c *gin.Context) {
+152: 	_, errorCode, errorMessage := GetUser(c)
+153: 	if errorCode != common.CodeSuccess {
+173: 
+174: func parseThumbnailDocIDs(c *gin.Context) []string {
+175: 	rawValues := c.QueryArray("doc_ids")
+176: 	seen := make(map[string]struct{}, len(rawValues))
+194: // GetDocumentImage returns a document image from object storage.
+195: func (h *DocumentHandler) GetDocumentImage(c *gin.Context) {
+196: 	_, errorCode, errorMessage := GetUser(c)
+197: 	if errorCode != common.CodeSuccess {
+200: 	}
+201: 	imageID := c.Param("image_id")
+202: 	ctx := c.Request.Context()
+203: 	data, err := h.documentService.GetDocumentImage(ctx, imageID)
+211: // GetDocumentImageForDocument serves image bytes only after checking the document's ownership of the image.
+212: func (h *DocumentHandler) GetDocumentImageForDocument(c *gin.Context) {
+213: 	_, errorCode, errorMessage := GetUser(c)
+214: 	if errorCode != common.CodeSuccess {
+217: 	}
+218: 	data, err := h.documentService.GetDocumentImageForDocument(c.Request.Context(), c.Param("id"), c.Param("image_id"))
+219: 	if err != nil {
+220: 		common.RespondError(c, common.CodeDataError, "Image not found: "+err.Error())
+225: 
+226: // GetDocumentThumbnail resolves the thumbnail through authorized document metadata.
+227: func (h *DocumentHandler) GetDocumentThumbnail(c *gin.Context) {
+228: 	data, err := h.documentService.GetDocumentThumbnail(c.Request.Context(), c.Param("id"))
+229: 	if err != nil {
+230: 		common.RespondError(c, common.CodeDataError, "Image not found: "+err.Error())
+235: 
+236: func (h *DocumentHandler) writeDocumentImage(c *gin.Context, data []byte) {
+237: 	contentType := documentImageContentType(data)
+238: 	if contentType == "" {
+245: 
+246: func documentImageContentType(data []byte) string {
+247: 	switch {
+248: 	case bytes.HasPrefix(data, []byte("\x89PNG\r\n\x1a\n")):
+262: 
+263: func (h *DocumentHandler) GetDocumentArtifact(c *gin.Context) {
+264: 	_, code, msg := GetUser(c)
+265: 	if code != common.CodeSuccess {
+268: 	}
+269: 	filename := c.Param("filename")
+270: 	ctx := c.Request.Context()
+271: 	artifact, err := h.documentService.GetDocumentArtifact(ctx, filename)
+287: 		c.Header("X-Content-Type-Options", "nosniff")
+288: 		c.Header("Content-Disposition", "attachment")
+289: 	} else {
+290: 		c.Header("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, artifact.SafeFilename))
+291: 	}
+292: 	c.Data(http.StatusOK, artifact.ContentType, artifact.Data)
+296: // and forces downloads for content that cannot be safely previewed inline.
+297: func (h *DocumentHandler) GetDocumentPreview(c *gin.Context) {
+298: 
+299: 	docID := c.Param("id")
+300: 
+301: 	if docID == "" {
+302: 		common.RespondError(c, common.CodeParamError, "id is required")
+303: 		return
+304: 	}
+324: 	// Use the shared preview-headers helper so that safe types get
+325: 	// Content-Disposition: inline with filename, while dangerous
+326: 	// types (HTML, SVG, XML) fall back to forced attachment with
+327: 	// nosniff. Mirrors Python document_api.py:2063 which calls
+328: 	// apply_preview_file_response_headers() with the document name.
+329: 	utility.SetPreviewFileResponseHeaders(c.Writer.Header(), preview.ContentType, ext, preview.FileName)
+339: // @Produce json
+340: // @Param id path int true "document ID"
+341: // @Param request body document.UpdateDocumentRequest true "update info"
+342: // @Success 200 {object} map[string]interface{}
+343: // @Router /api/v1/documents/{id} [put]
+344: func (h *DocumentHandler) UpdateDocument(c *gin.Context) {
+345: 	common.StartOperationLog(c, "update_dataset_document")
+346: 	defer common.FinishOperationLog(c)
+347: 
+348: 	common.SetOperationResource(c, "document_id", c.Param("id"))
+349
+[Snapshot excerpt truncated here; not a complete upstream file.]

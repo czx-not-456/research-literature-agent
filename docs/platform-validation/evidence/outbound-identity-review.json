@@ -1,0 +1,21 @@
+{
+  "reviewed_utc": "2026-11-18T07:52:08.293935+00:00",
+  "source_file": "屏幕截图 2026-11-18 154613.png",
+  "sha256": "5f51f795d5f0e0d72b0bddaa64a691ef5068d8ea3b48045a7a84ab58f50eadb2",
+  "observed": {
+    "page": "Agent Identity / 出站身份 / 创建出站身份",
+    "selected_authentication_type": "OAuth客户端",
+    "other_visible_types": [
+      "API Key",
+      "IAM委托"
+    ],
+    "oauth_fields": [
+      "客户端ID",
+      "客户端密钥",
+      "Discovery URL"
+    ]
+  },
+  "recommended_authentication_for_confirmed_deepseek_api": "API Key",
+  "suggested_identity_name": "deepseek-api-key",
+  "boundary": "API Key tab fields not yet visually inspected; no credentials read or identity created"
+}

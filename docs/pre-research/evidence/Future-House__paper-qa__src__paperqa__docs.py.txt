@@ -1,0 +1,281 @@
+Source: https://github.com/Future-House/paper-qa/blob/main/src/paperqa/docs.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=27486
+
+1: from __future__ import annotations
+2: 
+3: import asyncio
+4: import json
+5: import logging
+6: import os
+7: import re
+8: import tempfile
+9: import urllib.request
+10: import warnings
+11: from collections.abc import Callable, Sequence
+12: from datetime import datetime
+13: from io import BytesIO
+14: from pathlib import Path
+15: from typing import Any, BinaryIO, cast
+16: from uuid import UUID, uuid4
+17: 
+18: from aviary.core import Message
+19: from lmi import Embeddable, EmbeddingModel, LLMModel
+20: from lmi.types import set_llm_session_ids
+21: from lmi.utils import gather_with_concurrency
+22: from pydantic import BaseModel, ConfigDict, Field
+23: 
+24: from paperqa.clients import DEFAULT_CLIENTS, DocMetadataClient
+25: from paperqa.core import llm_parse_json, map_fxn_summary
+26: from paperqa.llms import (
+27:     NumpyVectorStore,
+28:     VectorStore,
+29: )
+30: from paperqa.prompts import CANNOT_ANSWER_PHRASE, EMPTY_CONTEXTS
+31: from paperqa.readers import read_doc
+32: from paperqa.settings import MaybeSettings, get_settings
+33: from paperqa.types import Doc, DocDetails, DocKey, PQASession, Text
+34: from paperqa.utils import (
+35:     citation_to_docname,
+36:     maybe_is_html,
+37:     maybe_is_pdf,
+38:     maybe_is_text,
+39:     md5sum,
+40: )
+41: 
+42: logger = logging.getLogger(__name__)
+43: 
+44: 
+45: class Docs(BaseModel):  # noqa: PLW1641  # TODO: add __hash__
+46:     """A collection of documents to be used for answering questions."""
+47: 
+48:     model_config = ConfigDict(extra="forbid")
+49: 
+50:     id: UUID = Field(default_factory=uuid4)
+51:     docs: dict[DocKey, Doc | DocDetails] = Field(default_factory=dict)
+52:     texts: list[Text] = Field(default_factory=list)
+53:     docnames: set[str] = Field(default_factory=set)
+54:     texts_index: VectorStore = Field(default_factory=NumpyVectorStore)
+55:     name: str = Field(default="default", description="Name of this docs collection")
+56:     deleted_dockeys: set[DocKey] = Field(default_factory=set)
+57: 
+58:     def __eq__(self, other) -> bool:
+59:         if (
+60:             not isinstance(other, type(self))
+77: 
+78:     def clear_docs(self) -> None:
+79:         self.texts = []
+80:         self.docs = {}
+83: 
+84:     def _get_unique_name(self, docname: str) -> str:
+85:         """Create a unique name given proposed name."""
+86:         suffix = ""
+92: 
+93:     async def aadd_file(
+94:         self,
+95:         file: BinaryIO,
+96:         citation: str | None = None,
+97:         docname: str | None = None,
+98:         dockey: DocKey | None = None,
+99:         title: str | None = None,
+100:         doi: str | None = None,
+101:         authors: list[str] | None = None,
+102:         settings: MaybeSettings = None,
+109:         suffix = ".txt"
+110:         if maybe_is_pdf(file):
+111:             suffix = ".pdf"
+112:         elif maybe_is_html(file):
+113:             suffix = ".html"
+119:                 Path(f.name),
+120:                 citation=citation,
+121:                 docname=docname,
+122:                 dockey=dockey,
+123:                 title=title,
+124:                 doi=doi,
+125:                 authors=authors,
+126:                 settings=settings,
+131: 
+132:     async def aadd_url(
+133:         self,
+134:         url: str,
+135:         citation: str | None = None,
+136:         docname: str | None = None,
+137:         dockey: DocKey | None = None,
+147:                 file,
+148:                 citation=citation,
+149:                 docname=docname,
+150:                 dockey=dockey,
+155: 
+156:     async def aadd(  # noqa: PLR0912
+157:         self,
+158:         path: str | os.PathLike,
+159:         citation: str | None = None,
+160:         docname: str | None = None,
+161:         dockey: DocKey | None = None,
+162:         title: str | None = None,
+163:         doi: str | None = None,
+164:         authors: list[str] | None = None,
+165:         settings: MaybeSettings = None,
+179:             llm_model = all_settings.get_llm()
+180:         if citation is None:
+181:             # Peek first chunk
+182:             texts = await read_doc(
+184:                 Doc(  # Fake doc
+185:                     docname="", citation="", dockey=dockey, content_hash=content_hash
+186:                 ),
+187:                 page_size_limit=parse_config.page_size_limit,
+188:                 parse_media=False,  # Peeking is text only
+189:                 # We only use the first chunk, so let's peek just enough pages for that.
+190:                 # Usually pages 1 - 2 give that,
+191:                 # but in the event page 2 is blank (true for some PDFs),
+192:                 # we read pages 1 - 3 to be safe
+193:                 page_range=(1, 3),
+194:                 parse_pdf=parse_config.parse_pdf,
+195:                 **parse_config.reader_config,
+196:             )
+201:                     Message(
+202:                         content=parse_config.citation_prompt.format(text=texts[0].text)
+203:                     ),
+204:                 ],
+205:             )
+206:             citation = cast("str", result.text)
+207:             if (
+208:                 len(citation) < 3  # noqa: PLR2004
+209:                 or "Unknown" in citation
+210:                 or "insufficient" in citation
+211:             ):
+212:                 citation = f"Unknown, {os.path.basename(path)}, {datetime.now().year}"
+213:             del result, texts  # Ensure we don't reuse
+214: 
+216:             docname=self._get_unique_name(
+217:                 citation_to_docname(citation) if docname is None else docname
+218:             ),
+219:             citation=citation,
+220:             dockey=dockey,
+221:             content_hash=content_hash,
+223: 
+224:         # try to extract DOI / title from the citation
+225:         if (doi is title is None) and parse_config.use_doc_details:
+226:             # TODO: specify a JSON schema here when many LLM providers support this
+227:             messages = [
+228:                 Message(
+229:                     content=parse_config.structured_citation_prompt.format(
+230:                         citation=citation
+231:                     ),
+232:                 ),
+245:             try:
+246:                 citation_json = json.loads(clean_text)
+247:                 if citation_title := citation_json.get("title"):
+248:                     title = citation_title
+249:                 if citation_doi := citation_json.get("doi"):
+250:                     doi = citation_doi
+251:                 if citation_author := citation_json.get("authors"):
+252:                     authors = citation_author
+253:             except (json.JSONDecodeError, AttributeError):
+254:                 # json.JSONDecodeError: clean_text was not actually JSON
+255:                 # AttributeError: citation_json was not a dict (e.g. a list)
+256:                 logger.warning(
+257:                     "Failed to parse all of title, DOI, and authors from the"
+258:                     " ParsingSettings.structured_citation_prompt's response"
+259:                     f" {clean_text}, consider using a manifest file or specifying a"
+260:                     " different citation prompt."
+261:                 )
+262:         # see if we can upgrade to DocDetails
+263:         # if not, we can progress with a normal Doc
+264:         # if "fields_to_overwrite_from_metadata" is used:
+265:         # will map "docname" to "key", and "dockey" to "doc_id"
+266:         if (title or doi) and parse_config.use_doc_details:
+267:             if kwargs.get("metadata_client"):
+268:                 metadata_client = kwargs["metadata_client"]
+269:             else:
+270:                 metadata_client = DocMetadataClient(
+271:                     http_client=kwargs.pop("http_client", None),
+272:                     metadata_clients=kwargs.pop("clients", DEFAULT_CLIENTS),
+273:                 )
+274: 
+275:             # Query here means a query to a metadata provider
+276:             query_kwargs: dict[str, Any] = {}
+277: 
+278:             if doi:
+279:                 query_kwargs["doi"] = doi
+280:             if authors:
+281:                 query_kwargs["authors"] = authors
+285:                 # if we had an autogenerated dockey, we would like our
+286:                 # metadata to be able to overwrite it if possible
+287:                 doc.fields_to_overwrite_from_metadata = {
+288:                     d
+289:                     for d in doc.fields_to_overwrite_from_metadata
+290:                     if d not in {"dockey", "doc_id"}
+291:                 }
+292: 
+293:             doc = await metadata_client.upgrade_doc_to_doc_details(
+294:                 doc, **(query_kwargs | kwargs)
+295:             )
+302:             )
+303:         texts, metadata = await read_doc(
+304:             path,
+305:             doc,
+306:             page_size_limit=parse_config.page_size_limit,
+307:             parse_pdf=parse_config.parse_pdf,
+308:             include_metadata=True,
+309:             **multimodal_kwargs,
+310:             **parse_config.reader_config,
+312:         # loose check to see if document was loaded
+313:         if metadata.name != "image" and (
+314:             not texts
+315:             or len(texts[0].text) < 10  # noqa: PLR2004
+319:                     (
+320:                         # Quick sanity check the text is not just some terse one-page
+321:                         # 404 message interspersed with newlines. Check here
+322:                         # instead of maybe_is_text because a 404 HTML page is text
+323:                         sum(len(t.text.replace("\n", "")) for t in texts[:2])
+324:                         < 20  # noqa: PLR2004
+326:                     # Use the first few text chunks to avoid potential issues with
+327:                     # title page parsing in the first chunk
+328:                     or not maybe_is_text("".join(t.text for t in texts[:5]))
+329:                 )
+339: 
+340:     async def aadd_texts(
+341:         self,
+342:         texts: list[Text],
+402: 
+403:     def delete(
+404:         self,
+405:         name: str | None = None,
+417:             warnings.warn(
+418:                 "The 'name' argument is deprecated in favor of 'docname',"
+419:                 " this deprecation will conclude in version 6.",
+420:                 category=DeprecationWarning,
+436: 
+437:     async def _build_texts_index(
+438:         self, embedding_model: EmbeddingModel, with_enrichment: bool = False
+439:     ) -> None:
+455: 
+456:     async def retrieve_texts(
+457:         self,
+458:         query: str,
+491: 
+492:     async def aget_evidence(
+493:         self,
+494:         query: PQASession | str,
+561:                             "summary_length": answer_config.evidence_summary_length,
+562:                             "citation": f"{m.name}: {m.doc.formatted_citation}",
+563:                         },
+564:                         parser=llm_parse_json if prompt_config.use_json else None,
+565:                         callbacks=callbacks,
+566:                         skip_citation_strip=answer_config.skip_evidence_citation_strip,
+567:                         evidence_text_only_fallback=answer_config.evidence_text_only_fallback,
+568:                     )
+587: 
+588:     async def aquery(
+589:         self,
+590:         query: PQASession | str,
+669:                             question=session.question,
+670:                             example_citation=prompt_config.EXAMPLE_CITATION,
+671:                             prior_answer_prompt=prior_answer_prompt,
+672:                         ),
+683:         # it still happens
+684:         if (ex_citation := prompt_config.EXAMPLE_CITATION) in answer_text:
+685:             answer_text = answer_text.replace(ex_citation, "")
+686: 
+687:         if answer_config.answer_filter_extra_background:

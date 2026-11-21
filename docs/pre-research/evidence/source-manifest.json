@@ -1,0 +1,393 @@
+{
+  "date": "2026-11-16",
+  "method": "Read-only GitHub connector; snapshots include partial excerpts as marked; not pinned commits",
+  "sources": [
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__backend__server__app.py.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/backend/server/app.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=16025",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__backend__utils.py.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/backend/utils.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=4142",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__docker-compose.yml.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/docker-compose.yml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=2320",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__gpt_researcher__agent.py.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/gpt_researcher/agent.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=29309",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__LICENSE.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/LICENSE",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=11357",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__main.py.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/main.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=986",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__README.md.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/README.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=16784",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/assafelovic__gpt-researcher__requirements.txt.txt",
+      "header": [
+        "Source: https://github.com/assafelovic/gpt-researcher/blob/master/requirements.txt",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=1149",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/docling-project__docling__docling__document_converter.py.txt",
+      "header": [
+        "Source: https://github.com/docling-project/docling/blob/main/docling/document_converter.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=43813",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/docling-project__docling__LICENSE.txt",
+      "header": [
+        "Source: https://github.com/docling-project/docling/blob/main/LICENSE",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=1072",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/docling-project__docling__pyproject.toml.txt",
+      "header": [
+        "Source: https://github.com/docling-project/docling/blob/main/pyproject.toml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=17080",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/docling-project__docling__README.md.txt",
+      "header": [
+        "Source: https://github.com/docling-project/docling/blob/main/README.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=8793",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/Future-House__paper-qa__LICENSE.txt",
+      "header": [
+        "Source: https://github.com/Future-House/paper-qa/blob/main/LICENSE",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=11341",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/Future-House__paper-qa__pyproject.toml.txt",
+      "header": [
+        "Source: https://github.com/Future-House/paper-qa/blob/main/pyproject.toml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=19150",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/Future-House__paper-qa__README.md.txt",
+      "header": [
+        "Source: https://github.com/Future-House/paper-qa/blob/main/README.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=60495",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/Future-House__paper-qa__src__paperqa__agents__tools.py.txt",
+      "header": [
+        "Source: https://github.com/Future-House/paper-qa/blob/main/src/paperqa/agents/tools.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=28526",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/Future-House__paper-qa__src__paperqa__docs.py.txt",
+      "header": [
+        "Source: https://github.com/Future-House/paper-qa/blob/main/src/paperqa/docs.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=27486",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/Future-House__paper-qa__src__paperqa__readers.py.txt",
+      "header": [
+        "Source: https://github.com/Future-House/paper-qa/blob/main/src/paperqa/readers.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=19143",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__docs__cn__sdk_user_guide__gateway_user_guide.md.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/docs/cn/sdk_user_guide/gateway_user_guide.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=9477",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__docs__cn__sdk_user_guide__runtime_user_guide.md.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/docs/cn/sdk_user_guide/runtime_user_guide.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=13161",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__docs__cn__toolkit_user_guide__invoke.md.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/docs/cn/toolkit_user_guide/invoke.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=4280",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__LICENSE.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/LICENSE",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=11357",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__pyproject.toml.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/pyproject.toml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=8570",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__README.md.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/README.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=16283",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/huaweicloud__agentarts-sdk-python__src__agentarts__sdk__runtime__app.py.txt",
+      "header": [
+        "Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/src/agentarts/sdk/runtime/app.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=28185",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__docker__docker-compose-base.yml.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/docker/docker-compose-base.yml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=17794",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__docker__docker-compose.yml.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/docker/docker-compose.yml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=2361",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__go.mod.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/go.mod",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=13451",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__internal__handler__chunk.go.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/internal/handler/chunk.go",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=20839",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__internal__handler__document.go.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/internal/handler/document.go",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=65190",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__LICENSE.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/LICENSE",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=11357",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__pyproject.toml.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/pyproject.toml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=8116",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/infiniflow__ragflow__README.md.txt",
+      "header": [
+        "Source: https://github.com/infiniflow/ragflow/blob/main/README.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=16676",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__api__routers__source_chat.py.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/api/routers/source_chat.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=17751",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__api__routers__sources.py.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/api/routers/sources.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=53472",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__commands__source_commands.py.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/commands/source_commands.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=13979",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__docker-compose.yml.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/docker-compose.yml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=3429",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__docs__1-INSTALLATION__from-source.md.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/docs/1-INSTALLATION/from-source.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=5372",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__docs__5-CONFIGURATION__mcp-integration.md.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/docs/5-CONFIGURATION/mcp-integration.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=5396",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__LICENSE.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/LICENSE",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=1061",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__open_notebook__domain__notebook.py.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/open_notebook/domain/notebook.py",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=38595",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__pyproject.toml.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/pyproject.toml",
+        "Retrieved: 2026-11-16",
+        "Snapshot: full; upstream chars=3122",
+        ""
+      ]
+    },
+    {
+      "snapshot": "evidence/lfnovo__open-notebook__README.md.txt",
+      "header": [
+        "Source: https://github.com/lfnovo/open-notebook/blob/main/README.md",
+        "Retrieved: 2026-11-16",
+        "Snapshot: selected line-numbered excerpts; capped; upstream chars=21035",
+        ""
+      ]
+    }
+  ]
+}

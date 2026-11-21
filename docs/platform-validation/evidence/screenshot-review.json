@@ -1,0 +1,46 @@
+{
+  "reviewed_utc": "2026-11-17T08:52:24.738970+00:00",
+  "method": "Direct visual inspection of both original local screenshots; files not modified",
+  "sources": [
+    {
+      "file": "屏幕截图 2026-11-17 164521.png",
+      "bytes": 536819,
+      "sha256": "958cf0f9ac46579f049d18be899ffbaff2be2a3dae2f81ace1b479e2acdd6dc6"
+    },
+    {
+      "file": "屏幕截图 2026-11-17 164724.png",
+      "bytes": 257027,
+      "sha256": "3fdb0fe653efd72dc454ac5130ada6ffd4b8d22f453750ab94958cb900c95b01"
+    }
+  ],
+  "observed": {
+    "region_label": "西南-贵阳一",
+    "product": "AgentArts",
+    "page": "Managed Agents / 创建智能体",
+    "fields_visible": [
+      "名称",
+      "描述",
+      "模型",
+      "提示词",
+      "环境"
+    ],
+    "model_selected": false,
+    "environment_selected": false,
+    "beta_notice_visible": true,
+    "beta_approval_confirmed": false,
+    "creation_price_label": "限时免费",
+    "account_home_arrears_label_visible": true,
+    "account_home_voucher_count_displayed": 0
+  },
+  "not_established": [
+    "successful creation",
+    "visual workflow canvas",
+    "model access",
+    "environment readiness",
+    "model inference pricing",
+    "deployment",
+    "official API invocation",
+    "platform external tool call"
+  ],
+  "privacy_scope": "No account name, delegation ID, precise balance or unrelated resource IDs transcribed"
+}

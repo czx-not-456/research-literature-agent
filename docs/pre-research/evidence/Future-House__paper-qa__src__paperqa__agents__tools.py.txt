@@ -1,0 +1,119 @@
+Source: https://github.com/Future-House/paper-qa/blob/main/src/paperqa/agents/tools.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=28526
+
+1: """Base classes for tools, implemented in a functional manner."""
+2: 
+3: import asyncio
+4: import inspect
+5: import logging
+6: import os
+7: import re
+8: import sys
+9: from collections.abc import Callable
+10: from itertools import chain
+11: from typing import ClassVar, Self, cast
+12: 
+13: from aviary.core import Message, ToolRequestMessage
+14: from lmi import Embeddable, EmbeddingModel, LiteLLMModel
+15: from pydantic import BaseModel, ConfigDict, Field, computed_field
+16: 
+17: from paperqa.docs import Docs
+18: from paperqa.settings import Settings
+19: from paperqa.sources.clinical_trials import add_clinical_trials_to_docs
+20: from paperqa.types import Context, DocDetails, PQASession
+21: 
+22: from .search import get_directory_index
+23: 
+24: logger = logging.getLogger(__name__)
+25: 
+26: 
+27: def make_status(
+28:     total_paper_count: int, relevant_paper_count: int, evidence_count: int, cost: float
+29: ) -> str:
+30:     return (
+31:         f"Status: Paper Count={total_paper_count}"
+32:         f" | Relevant Papers={relevant_paper_count} | Current Evidence={evidence_count}"
+33:         f" | Current Cost=${cost:.4f}"
+34:     )
+35: 
+36: 
+37: def default_status(state: "EnvironmentState") -> str:
+38:     relevant_contexts = state.get_relevant_contexts()
+39:     return make_status(
+40:         total_paper_count=len(state.docs.docs),
+41:         relevant_paper_count=len({c.text.doc.dockey for c in relevant_contexts}),
+42:         evidence_count=len(relevant_contexts),
+43:         cost=state.session.cost,
+44:     )
+45: 
+46: 
+47: class EnvironmentState(BaseModel):
+48:     """State here contains documents and answer being populated."""
+49: 
+50:     model_config = ConfigDict(extra="forbid")
+51: 
+52:     docs: Docs
+53:     session: PQASession
+54:     status_fn: Callable[[Self], str] | None = Field(
+55:         default=None,
+56:         description=(
+57:             "Function used to generate status,"
+58:             " uses `paperqa.agents.tools.default_status` "
+59:             "if not provided."
+60:         ),
+69:     @property
+70:     def status(self) -> str:
+71:         if self.status_fn is not None:
+72:             return self.status_fn(cast("Self", self))  # ty: ignore[redundant-cast]
+74: 
+75:     def get_relevant_contexts(self, score_threshold: int | None = 0) -> list[Context]:
+76:         """Get all contexts whose score is above (exclusive) of the input threshold."""
+77:         return [
+82: 
+83:     def record_action(self, action: Message | ToolRequestMessage) -> None:
+84:         self.session.add_tokens(action)
+85:         if isinstance(action, ToolRequestMessage):
+89: 
+90:     def query_tool_history(self, tool_name: str) -> bool:
+91:         """Return true if the tool is has been called in history."""
+92:         return tool_name in set(chain.from_iterable(self.session.tool_history))
+119: 
+120:     async def paper_search(
+121:         self,
+122:         query: str,
+147: 
+148:         def clean(value: int | str | None) -> int | None:
+149:             if isinstance(value, int | None):
+150:                 return value
+204:         self.previous_searches[search_key] += self.settings.agent.search_count
+205:         if self.settings.agent.return_paper_metadata:
+206:             retrieved_papers = "\n".join(
+207:                 [f"{x.title} ({x.year})" for x in all_doc_details]
+224: 
+225:     async def gather_evidence(self, question: str, state: EnvironmentState) -> str:
+226:         """
+227:         Gather evidence from previous papers given a specific question to increase evidence and relevant paper counts.
+322: 
+323:     async def gen_answer(self, state: EnvironmentState) -> str:
+324:         """
+325:         Generate an answer using current evidence.
+380:     @classmethod
+381:     def extract_answer_from_message(cls, content: str) -> str:
+382:         """Extract the answer from a message content."""
+383:         answer, *rest = re.split(
+391: 
+392:     async def reset(self, state: EnvironmentState) -> None:
+393:         """
+394:         Reset by clearing all current evidence from the system.
+414: 
+415:     async def complete(
+416:         self, has_successful_answer: bool, state: EnvironmentState
+417:     ) -> str:
+472: 
+473:     async def clinical_trials_search(self, query: str, state: EnvironmentState) -> str:
+474:         r"""Search for clinical trials, with support for repeated calls and concurrent execution.
+475: 
+476:         Will add new clinical trials to the state, and return metadata about the number of trials found.
+477: 
+478:         Args:

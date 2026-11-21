@@ -1,0 +1,31 @@
+{
+  "scope": "local external source only; not a platform call",
+  "url": "https://api.crossref.org/works?query.bibliographic=retrieval+augmented+generation&filter=type%3Ajournal-article&rows=2",
+  "utc": "2026-11-17T08:27:30.139919+00:00",
+  "http_status": 200,
+  "rate_headers": {
+    "x-rate-limit-limit": "1",
+    "x-rate-limit-interval": "1s"
+  },
+  "items": [
+    {
+      "title": [
+        "Retrieval-Augmented Generation: Enhancing AI with Reliable Knowledge."
+      ],
+      "doi": "10.21275/sr251104092705",
+      "type": "journal-article",
+      "url": "https://doi.org/10.21275/sr251104092705"
+    },
+    {
+      "title": [
+        "Retrieval Augmented Generation (RAG) Model"
+      ],
+      "doi": "10.55248/gengpi.6.0125.0635",
+      "type": "journal-article",
+      "url": "https://doi.org/10.55248/gengpi.6.0125.0635"
+    }
+  ],
+  "schema_valid": true,
+  "status": "passed_local_probe",
+  "elapsed_seconds": 2.672
+}

@@ -1,0 +1,270 @@
+Source: https://github.com/lfnovo/open-notebook/blob/main/open_notebook/domain/notebook.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=38595
+
+1: import asyncio
+2: import os
+3: from datetime import datetime
+4: from pathlib import Path
+5: from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+6: 
+7: from loguru import logger
+8: from pydantic import BaseModel, ConfigDict, Field, field_validator
+9: from surreal_commands import submit_command
+10: from surrealdb import RecordID
+11: 
+12: from open_notebook.database.repository import ensure_record_id, repo_query
+13: from open_notebook.domain.base import ObjectModel
+14: from open_notebook.exceptions import (
+15:     DatabaseOperationError,
+16:     InvalidInputError,
+17:     NotFoundError,
+18:     OpenNotebookError,
+19: )
+20: 
+21: # Retry budget for SurrealDB transaction conflicts when deleting a source
+22: SOURCE_DELETE_MAX_ATTEMPTS = 3
+23: SOURCE_DELETE_RETRY_DELAY_SECONDS = 0.5
+24: 
+25: 
+26: def _is_transaction_conflict(error: BaseException) -> bool:
+27:     """True if SurrealDB rejected the query with a retryable transaction conflict.
+28: 
+29:     Checks the wrapped cause too: ObjectModel.delete() re-raises DB errors as a
+30:     generic DatabaseOperationError.
+31:     """
+32:     cause = error.__cause__ or error.__context__
+33:     return any("can be retried" in str(err).lower() for err in (error, cause) if err)
+34: 
+35: 
+36: class Notebook(ObjectModel):
+37:     table_name: ClassVar[str] = "notebook"
+38:     name: str
+39:     description: str
+40:     archived: Optional[bool] = False
+41:     last_viewed_at: Optional[datetime] = None
+42: 
+43:     @field_validator("name")
+44:     @classmethod
+45:     def name_must_not_be_empty(cls, v):
+46:         if not v.strip():
+47:             raise InvalidInputError("Notebook name cannot be empty")
+48:         return v
+49: 
+50:     async def get_sources(self, include_full_text: bool = False) -> List["Source"]:
+51:         try:
+52:             source_projection = "" if include_full_text else " omit source.full_text"
+53:             srcs = await repo_query(
+54:                 f"""
+55:                 select *{source_projection} from (
+56:                 select in as source from reference where out=$id
+57:                 fetch source
+58:             ) order by source.updated desc
+59:             """,
+60:                 {"id": ensure_record_id(self.id)},
+67: 
+68:     async def get_notes(self, include_content: bool = False) -> List["Note"]:
+69:         try:
+70:             note_projection = (
+89: 
+90:     async def get_context(self) -> str:
+91:         """
+92:         Build long-form notebook context for podcast and LLM workflows.
+155: 
+156:     async def get_chat_sessions(self) -> List["ChatSession"]:
+157:         try:
+158:             srcs = await repo_query(
+180: 
+181:     async def get_delete_preview(self) -> Dict[str, Any]:
+182:         """
+183:         Get counts of items that would be affected by deleting this notebook.
+230: 
+231:     async def delete(self, delete_exclusive_sources: bool = False) -> Dict[str, int]:
+232:         """
+233:         Delete notebook with cascade deletion of notes and optional source deletion.
+339: 
+340: class SourceEmbedding(ObjectModel):
+341:     table_name: ClassVar[str] = "source_embedding"
+342:     content: str
+343: 
+344:     async def get_source(self) -> "Source":
+345:         try:
+346:             src = await repo_query(
+358: 
+359: class SourceInsight(ObjectModel):
+360:     table_name: ClassVar[str] = "source_insight"
+361:     insight_type: str
+364:     @classmethod
+365:     async def get_for_sources(
+366:         cls, source_ids: List[str]
+367:     ) -> Dict[str, List["SourceInsight"]]:
+392: 
+393:     async def get_source(self) -> "Source":
+394:         try:
+395:             src = await repo_query(
+406: 
+407:     async def save_as_note(self, notebook_id: Optional[str] = None) -> Any:
+408:         source = await self.get_source()
+409:         note = Note(
+422: 
+423: def fallback_source_title(
+424:     url: Optional[str] = None, file_path: Optional[str] = None
+425: ) -> Optional[str]:
+437: 
+438: def is_replaceable_source_title(
+439:     title: Optional[str],
+440:     url: Optional[str] = None,
+449: 
+450: class Source(ObjectModel):
+451:     model_config = ConfigDict(arbitrary_types_allowed=True)
+452: 
+459:     command: Optional[Union[str, RecordID]] = Field(
+460:         default=None, description="Link to surreal-commands processing job"
+461:     )
+462: 
+464:     @classmethod
+465:     def parse_command(cls, value):
+466:         """Parse command field to ensure RecordID format"""
+467:         if isinstance(value, str) and value:
+472:     @classmethod
+473:     def parse_id(cls, value):
+474:         """Parse id field to handle both string and RecordID inputs"""
+475:         if value is None:
+480: 
+481:     async def get_status(self) -> Optional[str]:
+482:         """Get the processing status of the associated command"""
+483:         if not self.command:
+486:         try:
+487:             from surreal_commands import get_command_status
+488: 
+489:             status = await get_command_status(str(self.command))
+494: 
+495:     async def get_processing_progress(self) -> Optional[Dict[str, Any]]:
+496:         """Get detailed processing information for the associated command"""
+497:         if not self.command:
+500:         try:
+501:             from surreal_commands import get_command_status
+502: 
+503:             status_result = await get_command_status(str(self.command))
+506: 
+507:             # Extract execution metadata if available
+508:             result = getattr(status_result, "result", None)
+509:             execution_metadata = (
+510:                 result.get("execution_metadata", {}) if isinstance(result, dict) else {}
+511:             )
+512: 
+514:                 "status": status_result.status,
+515:                 "started_at": execution_metadata.get("started_at"),
+516:                 "completed_at": execution_metadata.get("completed_at"),
+517:                 "error": getattr(status_result, "error_message", None),
+518:                 "result": result,
+523: 
+524:     async def get_context(
+525:         self,
+526:         context_size: Literal["short", "long"] = "short",
+545: 
+546:     async def get_embedded_chunks(self) -> int:
+547:         try:
+548:             result = await repo_query(
+561: 
+562:     async def get_insights(self) -> List[SourceInsight]:
+563:         try:
+564:             result = await repo_query(
+575: 
+576:     async def add_to_notebook(self, notebook_id: str) -> Any:
+577:         if not notebook_id:
+578:             raise InvalidInputError("Notebook ID must be provided")
+581: 
+582:     async def vectorize(self) -> str:
+583:         """
+584:         Submit vectorization as a background job using the embed_source command.
+593:         Returns:
+594:             str: The command/job ID that can be used to track progress via the commands API
+595: 
+596:         Raises:
+627: 
+628:     async def add_insight(self, insight_type: str, content: str) -> str:
+629:         """
+630:         Submit insight creation as an async command (fire-and-forget).
+650:                 vectorize()'s contract - callers (transformation.py, source.py)
+651:                 run inside surreal-commands jobs whose outer exception
+652:                 handling already retries transient failures, so a swallowed
+653:                 submission failure here previously meant a transformation
+683: 
+684:     def _prepare_save_data(self) -> dict:
+685:         """Override to ensure command field is always RecordID format for database"""
+686:         data = super()._prepare_save_data()
+693: 
+694:     async def delete(self) -> bool:
+695:         """Delete source, its embeddings and insights, then its uploaded file.
+696: 
+697:         SurrealDB transaction conflicts (e.g. the worker writing embeddings at
+698:         the same time) are retried a few times. Any failure is raised so the
+699:         API does not report a source as deleted when it still exists.
+700:         """
+701:         if self.id is None:
+762:     @classmethod
+763:     def content_must_not_be_empty(cls, v):
+764:         if v is not None and not v.strip():
+765:             raise InvalidInputError("Note content cannot be empty")
+767: 
+768:     async def save(self) -> Optional[str]:
+769:         """
+770:         Save the note and submit embedding command.
+802: 
+803:     async def add_to_notebook(self, notebook_id: str) -> Any:
+804:         if not notebook_id:
+805:             raise InvalidInputError("Notebook ID must be provided")
+808: 
+809:     def get_context(
+810:         self, context_size: Literal["short", "long"] = "short"
+811:     ) -> Dict[str, Any]:
+827: 
+828:     async def relate_to_notebook(self, notebook_id: str) -> Any:
+829:         if not notebook_id:
+830:             raise InvalidInputError("Notebook ID must be provided")
+832: 
+833:     async def relate_to_source(self, source_id: str) -> Any:
+834:         if not source_id:
+835:             raise InvalidInputError("Source ID must be provided")
+838: 
+839: async def resolve_notebook_scope(notebook_ids: List[str]) -> List[str]:
+840:     """Validate a notebook scope before it reaches text_search / vector_search.
+841: 
+852:     # Only notebook ids are accepted: a source or note id would fail the typed
+853:     # record<notebook> parameter inside SurrealDB instead of returning cleanly,
+854:     # and "notebook:" with an empty key would blow up in RecordID.parse.
+855:     record_ids: List[RecordID] = []
+873:         # Same contract as text_search / vector_search: log the raw driver
+874:         # error here, surface a typed error to the API layer.
+875:         logger.error(f"Error resolving notebook scope: {str(e)}")
+876:         logger.exception(e)
+886: 
+887: def _scope_record_ids(notebook_ids: Optional[List[str]]) -> Optional[List[RecordID]]:
+888:     """Normalize a notebook scope for fn::text_search / fn::vector_search.
+889: 
+890:     Returns None for an empty scope (global search) so the SurrealQL functions
+891:     take their unfiltered path, otherwise the ids as RecordIDs.
+892:     """
+897: 
+898: async def text_search(
+899:     keyword: str,
+900:     results: int,
+922:     except RuntimeError as e:
+923:         # SurrealDB's search::highlight can compute a byte position that exceeds the
+924:         # stored string length on large or multi-byte chunks, aborting the whole query
+925:         # ("position overflow"). Fall back to vector search so the user still gets
+926:         # results instead of a 500. See issue #648.
+927:         if "position overflow" in str(e):
+928:             logger.warning(
+929:                 f"Highlight position overflow, falling back to vector search: {str(e)}"
+930:             )
+931:             try:
+951: 
+952: async def vector_search(
+953:     keyword: str,
+954:     results: int,
+979:         )
+980:         # SurrealDB fn::vector_search declares ORDER BY similarity DESC, but the
+981:         # SELECT * FROM fn::... wrapper can still return rows out of rank order.
+982:         # Enforce descending similarity (stable by id for ties) before returning.

@@ -1,0 +1,160 @@
+Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/docs/cn/sdk_user_guide/runtime_user_guide.md
+Retrieved: 2026-11-16
+Snapshot: full; upstream chars=13161
+
+# Runtime SDK 用户指南
+
+## 概述
+
+AgentArts Runtime SDK 提供了将 Agent 封装为 HTTP/WebSocket 服务的能力。通过 `AgentArtsRuntimeApp` 类，您可以快速构建一个符合华为云 AgentArts 控制面标准的 Agent 服务。
+
+### 核心组件
+
+| 组件 | 说明 |
+|------|------|
+| `AgentArtsRuntimeApp` | ASGI 应用程序，提供 HTTP/WebSocket 服务端点 |
+| `RequestContext` | 请求上下文数据模型，包含 session_id、request_id 等信息 |
+| `AgentArtsRuntimeContext` | 全局上下文管理器，基于 contextvars 实现，支持异步安全访问 |
+
+### 服务端点
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/invocations` | POST | Agent 调用入口 |
+| `/ping` | GET | 健康检查端点 |
+| `/ws` | WebSocket | 双向流式通信端点 |
+
+## 环境要求
+
+- Python 3.10+
+- 支持 ASGI 服务器（uvicorn、hypercorn 等）
+
+### 环境变量配置
+
+Runtime SDK 依赖以下环境变量：
+
+| 环境变量 | 说明 | 必填 |
+|----------|------|------|
+| `HUAWEICLOUD_SDK_AK` | 华为云 Access Key | 是（部署到华为云时） |
+| `HUAWEICLOUD_SDK_SK` | 华为云 Secret Key | 是（部署到华为云时） |
+| `HUAWEICLOUD_SDK_REGION` | 华为云区域 | 是（部署到华为云时） |
+| `AGENTARTS_RUNTIME_DATA_ENDPOINT` | Runtime 数据面端点 | 否（自定义端点时） |
+
+> **Note:** 更多环境变量配置请参考 [环境变量配置指南](environment_variables.md)。
+
+### 框架版本要求
+
+使用可选框架依赖时，请确保满足以下最低版本要求：
+
+| 框架 | 最低版本 | 安装命令 |
+|------|----------|----------|
+| LangGraph | 1.0.0 | `pip install agentarts-sdk[langgraph]` |
+| LangChain | 0.1.0 | `pip install agentarts-sdk[langchain]` |
+| langchain-core | 0.1.0 | 随 langgraph/langchain 自动安装 |
+
+> **注意：** LangGraph 1.0+ 引入了新的 Checkpoint 格式，包含必需字段（`step`、`pending_sends`、`parents`）。SDK 的集成模块兼容 LangGraph 1.0 及以上版本。
+
+## 快速开始
+
+### 基本示例
+
+```python
+from agentarts.sdk import AgentArtsRuntimeApp, RequestContext
+
+app = AgentArtsRuntimeApp()
+
+
+@app.entrypoint
+async def handler(payload: dict, context: RequestContext = None) -> dict:
+    """Agent 入口函数"""
+    message = payload.get("message", "")
+    return {"response": f"Received: {message}"}
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+### 启动服务
+
+```bash
+# 使用 agentarts CLI
+agentarts dev
+
+# 或直接运行
+python agent.py
+
+# 或使用 uvicorn
+uvicorn agent:app --host 0.0.0.0 --port 8080
+```
+
+## AgentArtsRuntimeApp 类
+
+### 初始化参数
+
+```python
+app = AgentArtsRuntimeApp(
+    debug=False,           # 调试模式
+    lifespan=None,         # 生命周期管理
+    middleware=None,       # 中间件列表
+    protocol="http",       # 协议类型: "http" 或 "https"
+    max_concurrency=15,    # 最大并发请求数
+)
+```
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `debug` | `bool` | `False` | 调试模式 |
+| `lifespan` | `Lifespan` | `None` | 生命周期管理 |
+| `middleware` | `Sequence[Middleware]` | `None` | 中间件列表 |
+| `protocol` | `"http"` \| `"https"` | `"http"` | 协议类型 |
+| `max_concurrency` | `int` | `15` | 最大并发请求数，超出返回 503 错误 |
+
+### run() 方法
+
+启动 ASGI 服务器：
+
+```python
+app.run(host="0.0.0.0", port=8080)
+```
+
+参数说明：
+- `host`: 绑定地址，默认在 Docker 环境中为 `0.0.0.0`，本地为 `127.0.0.1`
+- `port`: 绑定端口，默认 `8080`
+- `**kwargs`: 传递给 uvicorn 的其他参数
+
+## 装饰器
+
+### @app.entrypoint
+
+注册 Agent 主入口函数，处理 `/invocations` 端点的请求。
+
+#### 基本用法
+
+```python
+@app.entrypoint
+def handler(payload: dict) -> dict:
+    """同步处理函数"""
+    return {"result": payload["message"].upper()}
+
+
+@app.entrypoint
+async def async_handler(payload: dict) -> dict:
+    """异步处理函数"""
+    result = await some_async_operation(payload)
+    return result
+```
+
+#### 使用请求上下文
+
+```python
+@app.entrypoint
+async def handler(payload: dict, context: RequestContext = None) -> dict:
+    """带上下文的处理函数"""
+    session_id = context.session_id if context else None
+    request_id = context.request_id if context else None
+    
+    return {
+        "response": "OK",
+        "
+[Selected excerpt only; full source available at URL above.]

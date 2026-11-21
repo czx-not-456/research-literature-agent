@@ -1,0 +1,102 @@
+[
+  {
+    "name": "agentarts-help",
+    "url": "https://support.huaweicloud.com/agentarts/index.html",
+    "time_utc": "2026-11-16T13:59:54.774149+00:00",
+    "status": 200,
+    "final_url": "https://support.huaweicloud.com/agentarts/index.html",
+    "bytes": 2191
+  },
+  {
+    "name": "agentarts-product",
+    "url": "https://www.huaweicloud.com/product/agentarts.html",
+    "time_utc": "2026-11-16T13:59:54.776659+00:00",
+    "status": 200,
+    "final_url": "https://www.huaweicloud.com/product/agentarts.html",
+    "bytes": 987
+  },
+  {
+    "name": "openalex",
+    "url": "https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication",
+    "time_utc": "2026-11-16T13:59:54.776659+00:00",
+    "status": 200,
+    "final_url": "https://help.openalex.org/api/authentication/",
+    "bytes": 41149
+  },
+  {
+    "name": "openalex-new",
+    "url": "https://developers.openalex.org/how-to-use-the-api/rate-limits-and-authentication",
+    "time_utc": "2026-11-16T13:59:54.777659+00:00",
+    "status": 200,
+    "final_url": "https://help.openalex.org/api/authentication/",
+    "bytes": 41149
+  },
+  {
+    "name": "s2",
+    "url": "https://www.semanticscholar.org/product/api",
+    "time_utc": "2026-11-16T13:59:54.777659+00:00",
+    "status": 200,
+    "final_url": "https://www.semanticscholar.org/product/api",
+    "bytes": 38434
+  },
+  {
+    "name": "s2-license",
+    "url": "https://www.semanticscholar.org/product/api/license",
+    "time_utc": "2026-11-16T13:59:54.778663+00:00",
+    "status": 200,
+    "final_url": "https://www.semanticscholar.org/product/api/license",
+    "bytes": 46124
+  },
+  {
+    "name": "crossref",
+    "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/rest-api-metadata-retrieval/",
+    "time_utc": "2026-11-16T13:59:55.026847+00:00",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "name": "crossref-limits",
+    "url": "https://www.crossref.org/blog/announcing-changes-to-rest-api-rate-limits/",
+    "time_utc": "2026-11-16T13:59:55.050342+00:00",
+    "status": 200,
+    "final_url": "https://www.crossref.org/blog/announcing-changes-to-rest-api-rate-limits/",
+    "bytes": 49808
+  },
+  {
+    "name": "arxiv",
+    "url": "https://info.arxiv.org/help/api/tou.html",
+    "time_utc": "2026-11-16T13:59:55.846055+00:00",
+    "status": 200,
+    "final_url": "https://info.arxiv.org/help/api/tou.html",
+    "bytes": 84988
+  },
+  {
+    "name": "deepseek",
+    "url": "https://api-docs.deepseek.com/quick_start/pricing",
+    "time_utc": "2026-11-16T13:59:55.891902+00:00",
+    "status": 200,
+    "final_url": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "bytes": 29133
+  },
+  {
+    "name": "qwen",
+    "url": "https://help.aliyun.com/zh/model-studio/models",
+    "time_utc": "2026-11-16T13:59:55.916112+00:00",
+    "status": 200,
+    "final_url": "https://help.aliyun.com/zh/model-studio/models",
+    "bytes": 136857
+  },
+  {
+    "name": "siliconflow",
+    "url": "https://docs.siliconflow.cn/cn/userguide/pricing",
+    "time_utc": "2026-11-16T13:59:56.124303+00:00",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "name": "huawei-model",
+    "url": "https://support.huaweicloud.com/productdesc-maas/maas_01_0001.html",
+    "time_utc": "2026-11-16T13:59:56.353433+00:00",
+    "status": 200,
+    "final_url": "https://support.huaweicloud.com/productdesc-maas/maas_01_0001.html",
+    "bytes": 2191
+  }
+]

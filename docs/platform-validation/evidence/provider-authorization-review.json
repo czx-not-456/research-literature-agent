@@ -1,0 +1,52 @@
+{
+  "reviewed_utc": "2026-11-17T12:48:57.047563+00:00",
+  "sources": [
+    {
+      "file": "屏幕截图 2026-11-17 203234.png",
+      "sha256": "127d4f5eb3c58a5250fbb9ad5d73d16f766a04b477d590fa0e907f558c27fcf5",
+      "bytes": 243606
+    },
+    {
+      "file": "屏幕截图 2026-11-17 204223.png",
+      "sha256": "bf0d9bdd0887d8a40b670f3bd943e0335cd6a9f9cf09341bb51f1c28b36ffca6",
+      "bytes": 268251
+    }
+  ],
+  "user_report": "dependency authorization completed; can now add model provider",
+  "authorization_image": {
+    "title": "周边依赖服务开通及授权",
+    "visible_service_rows": [
+      "APM",
+      "AOM",
+      "LTS",
+      "SWR",
+      "AgentIdentity"
+    ],
+    "rows_show_pre_authorization_status": true,
+    "notice": "Enabling and authorization itself not billed; subsequent actual use is usage-billed",
+    "lts_allowance_visible": "500MB; billing period and full overage terms truncated"
+  },
+  "provider_image": {
+    "provider_form_accessible": true,
+    "base_url_placeholder": "https://example.com",
+    "service_dialog_accessible": true,
+    "service_list_count": "0/10",
+    "protocol_options": [
+      "标准OpenAI协议",
+      "Anthropic协议",
+      "华为云MaaS标准API V1"
+    ],
+    "model_type_options": [
+      "文本对话/图像理解",
+      "文本向量化",
+      "多模态对话",
+      "文本排序",
+      "实时语音对话"
+    ],
+    "actual_upstream_model_id": "not_provided",
+    "actual_base_url": "not_provided",
+    "provider_saved": "not_observed",
+    "authentication_fields": "not_shown"
+  },
+  "boundary": "Form access and user-reported authorization are not successful inference, per-service entitlement verification, or free usage confirmation."
+}

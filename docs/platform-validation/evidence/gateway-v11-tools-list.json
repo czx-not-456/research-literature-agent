@@ -1,0 +1,26 @@
+{
+  "source": "User-reported terminal output in project conversation",
+  "environment": "Local PowerShell, Python virtual environment and existing AgentArts IAM MCP gateway",
+  "region": "cn-southwest-2",
+  "signing": "V11-HMAC-SHA256",
+  "command": "docs/platform-validation/scripts/probe_gateway_mcp.py --signing v11",
+  "output": {
+    "status": "ok",
+    "scope": "gateway_mcp_only",
+    "tools": [
+      "crossref-search_search_papers"
+    ]
+  },
+  "exercised": [
+    "MCP initialize",
+    "notifications/initialized",
+    "tools/list"
+  ],
+  "not_exercised": [
+    "tools/call from this external client",
+    "AgentArts Runtime identity",
+    "Agent execution",
+    "External Agent API"
+  ],
+  "previous_signing_result": "SDK-HMAC-SHA256: initialize HTTP 401 in this validation"
+}

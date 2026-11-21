@@ -1,0 +1,313 @@
+Source: https://github.com/lfnovo/open-notebook/blob/main/api/routers/sources.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=53472
+
+1: import asyncio
+2: import hashlib
+3: import os
+4: import re
+5: from pathlib import Path
+6: from typing import Any, Dict, List, Optional
+7: from urllib.parse import urlparse, urlunparse
+8: 
+9: from content_core import check_file_support
+10: from fastapi import (
+11:     APIRouter,
+12:     Depends,
+13:     File,
+14:     Form,
+15:     HTTPException,
+16:     Query,
+17:     UploadFile,
+18: )
+19: from fastapi.responses import FileResponse, Response
+20: from loguru import logger
+21: from pydantic import ValidationError
+22: from surreal_commands import execute_command_sync, submit_command
+23: 
+24: from api.command_service import CommandService
+25: from api.credentials_service import validate_url
+26: from api.models import (
+27:     AssetModel,
+28:     CreateSourceInsightRequest,
+29:     DuplicateCheckRequest,
+30:     DuplicateCheckResponse,
+31:     DuplicateSourceInfo,
+32:     InsightCreationResponse,
+33:     SourceCreate,
+34:     SourceInsightResponse,
+35:     SourceListResponse,
+36:     SourceResponse,
+37:     SourceStatusResponse,
+38:     SourceUpdate,
+39: )
+40: from commands.source_commands import SourceProcessingInput
+41: from open_notebook.config import UPLOADS_FOLDER
+42: from open_notebook.database.repository import ensure_record_id, repo_query
+43: from open_notebook.domain.notebook import (
+44:     PLACEHOLDER_SOURCE_TITLE,
+45:     Asset,
+46:     Notebook,
+47:     Source,
+48: )
+49: from open_notebook.domain.transformation import Transformation
+50: from open_notebook.exceptions import (
+51:     InvalidInputError,
+52:     NotFoundError,
+53:     OpenNotebookError,
+54:     UnsupportedTypeException,
+55: )
+56: 
+57: router = APIRouter()
+58: 
+59: 
+60: async def _assert_file_supported(file_path: str) -> None:
+61:     """Pre-flight check that content-core can actually extract this file.
+62: 
+85: 
+86: def _truncate_error(msg: Optional[str], limit: int = 200) -> Optional[str]:
+87:     """Cap error text surfaced to clients.
+88: 
+90:     return at most ``limit`` characters so a raw traceback message can't leak
+91:     to the API response. ``None`` passes through unchanged.
+92:     """
+93:     if not msg:
+97: 
+98: def _with_truncated_error(
+99:     processing_info: Optional[Dict[str, Any]],
+100: ) -> Optional[Dict[str, Any]]:
+109:     "updated": "updated",
+110:     # `title` carries a SEARCH (BM25) index; SurrealDB's planner tries to use
+111:     # it for ORDER BY and fails ("No iterator has been found"), so we sort by
+112:     # a computed alias instead — which also makes the sort case-insensitive.
+132: 
+133: def _decode_unreserved(text: str) -> str:
+134:     """Percent-decode only unreserved characters.
+135: 
+139: 
+140:     def _repl(match: re.Match) -> str:
+141:         char = chr(int(match.group(1), 16))
+142:         return char if char in _UNRESERVED_CHARS else match.group(0).upper()
+146: 
+147: def normalize_source_url(url: str) -> str:
+148:     """Normalize a link URL for duplicate comparison (Issue #257).
+149: 
+150:     Lowercases scheme/host, strips the default port (80 for http, 443 for
+151:     https), trailing slashes, fragments, tracking query params (utm_*), and
+152:     percent-encoding noise on unreserved characters so that
+153:     trivially-different spellings of the same link still match. Never raises:
+184: 
+185: def normalize_filename(name: Optional[str]) -> str:
+186:     """Normalize a filename/title for weak duplicate matching."""
+187:     return (name or "").strip().lower()
+189: 
+190: def content_hash(text: Optional[str]) -> Optional[str]:
+191:     """SHA-256 of normalized extracted text; None when there is nothing to hash."""
+192:     if not text or not text.strip():
+196: 
+197: def _row_to_duplicate_info(row: dict, match_reason: str) -> DuplicateSourceInfo:
+198:     asset = row.get("asset") or {}
+199:     filename = None
+214: 
+215: async def find_duplicate_sources(
+216:     source_type: Optional[str] = None,
+217:     url: Optional[str] = None,
+225:     uploaded file) instead of scanning the whole table, then compares
+226:     normalized values in Python. Priority order: normalized URL for links,
+227:     exact content hash for text sources, normalized filename/title as a weak
+228:     fallback. Returns [] (never raises) so a duplicate lookup can never block
+241:     clauses: List[str] = []
+242:     params: dict[str, Any] = {}
+243:     if host:
+244:         clauses.append(
+247:         )
+248:         params["host"] = host
+249:     if wanted_hash:
+250:         # Bounded prefilter: stored full_text is un-normalized and the hash
+258:         )
+259:         params["min_len"] = raw_len // 2
+260:         params["max_len"] = raw_len * 2 + 512
+261:     if weak:
+262:         clauses.append(
+266:         )
+267:         params["weak_title"] = weak
+268:         params["weak_file"] = weak.rsplit(".", 1)[0] if "." in weak else weak
+269:     if not clauses:
+270:         return []
+279:             + " OR ".join(clauses),
+280:             params,
+281:         )
+282:     except Exception as e:  # pragma: no cover - defensive
+308: 
+309: async def _stamp_source_view(source_id: str) -> None:
+310:     # Best-effort write-on-read: recording the view timestamp must never turn a
+311:     # successful read into a 500. Log and move on if the stamp update fails.
+320: 
+321: def generate_unique_filename(original_filename: str, upload_folder: str) -> str:
+322:     """Generate unique filename like Streamlit app (append counter if file exists),
+323:     atomically reserving it so two concurrent uploads that land on the same
+362: 
+363: def _write_uploaded_file(filename: str, content: bytes) -> str:
+364:     """Sync filesystem work for save_uploaded_file() - run via asyncio.to_thread
+365:     so a large upload doesn't block the event loop for other requests."""
+380: 
+381: async def save_uploaded_file(upload_file: UploadFile) -> str:
+382:     """Save uploaded file to uploads folder and return file path."""
+383:     if not upload_file.filename:
+389: 
+390: def parse_source_form_data(
+391:     type: str = Form(...),
+392:     notebook_id: Optional[str] = Form(None),
+406:     # Convert string booleans to actual booleans
+407:     def str_to_bool(value: str) -> bool:
+408:         return value.lower() in ("true", "1", "yes", "on")
+409: 
+460: 
+461: @router.post("/sources/check-duplicates", response_model=DuplicateCheckResponse)
+462: async def check_duplicates(payload: DuplicateCheckRequest):
+463:     """Pre-creation duplicate probe for the add-source flow (#257).
+464: 
+472:         # Same SSRF guard as source creation: never normalize or echo a URL
+473:         # that points at internal/metadata addresses.
+474:         try:
+475:             await validate_url(payload.url, "source")
+487: 
+488: @router.get("/sources", response_model=List[SourceListResponse])
+489: async def get_sources(
+490:     notebook_id: Optional[str] = Query(None, description="Filter by notebook ID"),
+491:     limit: int = Query(
+502:     try:
+503:         # Validate sort parameters
+504:         if sort_by not in SOURCE_SORT_FIELDS:
+505:             raise HTTPException(
+522:         # Build the query - same projection with or without the notebook
+523:         # filter; only the FROM clause and bound params differ.
+524:         params: dict[str, Any] = {"limit": limit, "offset": offset}
+525:         if notebook_id:
+526:             # Verify notebook exists first
+531:             from_clause = "(select value in from reference where out=$notebook_id)"
+532:             params["notebook_id"] = ensure_record_id(notebook_id)
+533:         else:
+534:             from_clause = "source"
+547:         """
+548:         result = await repo_query(query, params)
+549: 
+550:         # Convert result to response model
+562:                 status = command.get("status")
+563:                 # Extract execution metadata from nested result structure
+564:                 result_data = command.get("result")
+565:                 execution_metadata = (
+566:                     result_data.get("execution_metadata", {})
+567:                     if isinstance(result_data, dict)
+568:                     else {}
+570:                 processing_info = {
+571:                     "started_at": execution_metadata.get("started_at"),
+572:                     "completed_at": execution_metadata.get("completed_at"),
+573:                     "error": _truncate_error(command.get("error_message")),
+574:                 }
+614: 
+615: def _source_to_response(
+616:     source: Source, embedded_chunks: int = 0, **extras: Any
+617: ) -> SourceResponse:
+643: 
+644: def _cleanup_uploaded_file(
+645:     file_path: Optional[str], upload_file: Optional[UploadFile]
+646: ) -> None:
+657: 
+658: async def _build_content_state(
+659:     source_data: SourceCreate, file_path: Optional[str]
+660: ) -> dict[str, Any]:
+667:             raise HTTPException(status_code=400, detail="URL is required for link type")
+668:         # Block SSRF to internal/metadata addresses before the server ever
+669:         # fetches this URL (same guard used for provider-credential URLs).
+670:         try:
+709: 
+710: async def _create_source_async_path(
+711:     source_data: SourceCreate,
+712:     content_state: dict[str, Any],
+718: 
+719:     # Create source record with asset - let SurrealDB generate the ID
+720:     # Persist asset before save so it's available for retry if processing fails
+721:     if source_data.type == "link":
+779:         # Clean up source record before the error propagates (typed domain
+780:         # errors are mapped by the global handlers in api/main.py)
+781:         try:
+782:             await source.delete()
+796: 
+797: async def _create_source_sync_path(
+798:     source_data: SourceCreate,
+799:     content_state: dict[str, Any],
+808: 
+809:         # Create source record - let SurrealDB generate the ID
+810:         source = Source(
+811:             title=source_data.title or PLACEHOLDER_SOURCE_TITLE,
+831:         # execute_command_sync uses asyncio.run() internally which can't
+832:         # be called from an already-running event loop (FastAPI)
+833:         result = await asyncio.to_thread(
+834:             execute_command_sync,
+869: 
+870: @router.post("/sources", response_model=SourceResponse)
+871: async def create_source(
+872:     form_data: tuple[SourceCreate, Optional[UploadFile]] = Depends(
+873:         parse_source_form_data
+938: 
+939: @router.post("/sources/json", response_model=SourceResponse)
+940: async def create_source_json(source_data: SourceCreate):
+941:     """Create a new source using JSON payload (legacy endpoint for backward compatibility)."""
+942:     # Convert to form data format and call main endpoint
+946: 
+947: async def _resolve_source_file(source_id: str) -> tuple[str, str]:
+948:     source = await Source.get(source_id)
+949:     if not source:
+971: 
+972: def _is_source_file_available(source: Source) -> Optional[bool]:
+973:     if not source or not source.asset or not source.asset.file_path:
+974:         return None
+985: 
+986: @router.get("/sources/{source_id}", response_model=SourceResponse)
+987: async def get_source(source_id: str):
+988:     """Get a specific source by ID."""
+989:     try:
+1041: 
+1042: @router.head("/sources/{source_id}/download")
+1043: async def check_source_file(source_id: str):
+1044:     """Check if a source has a downloadable file."""
+1045:     try:
+1056: 
+1057: @router.get("/sources/{source_id}/download")
+1058: async def download_source_file(source_id: str):
+1059:     """Download the original file associated with an uploaded source."""
+1060:     try:
+1075: 
+1076: @router.get("/sources/{source_id}/status", response_model=SourceStatusResponse)
+1077: async def get_source_status(source_id: str):
+1078:     """Get processing status for a source."""
+1079:     try:
+1142: 
+1143: @router.put("/sources/{source_id}", response_model=SourceResponse)
+1144: async def update_source(source_id: str, source_update: SourceUpdate):
+1145:     """Update a source."""
+1146:     try:
+1171: 
+1172: @router.post("/sources/{source_id}/retry", response_model=SourceResponse)
+1173: async def retry_source_processing(source_id: str):
+1174:     """Retry processing for a failed or stuck source."""
+1175:     try:
+1292: 
+1293: @router.delete("/sources/{source_id}")
+1294: async def delete_source(source_id: str):
+1295:     """Delete a source."""
+1296:     try:
+1312: 
+1313: @router.get("/sources/{source_id}/insights", response_model=List[SourceInsightResponse])
+1314: async def get_source_insights(source_id: str):
+1315:     """Get all insights for a specific source."""
+1316:     try:
+1341: 
+1342: @router.post(
+1343:     "/sources/{source_id}/insights",
+1344:     response_model=InsightCreationResponse,
+1346: )
+1347: async def create_source_insight(source_id: str, request: CreateSourceInsightRequest):
+1348:     """
+1349:     Start insight generation for a source by running a transformation.

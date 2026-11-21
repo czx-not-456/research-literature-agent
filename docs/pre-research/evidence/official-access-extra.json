@@ -1,0 +1,78 @@
+[
+  {
+    "name": "openalex-pricing",
+    "url": "https://help.openalex.org/api/pricing/",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "name": "openalex-license",
+    "url": "https://help.openalex.org/overview/legal/",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "name": "crossref-rest",
+    "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+    "status": 200,
+    "final_url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+    "bytes": 70732,
+    "rate_headers": {}
+  },
+  {
+    "name": "qwen-price",
+    "url": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "status": 200,
+    "final_url": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "bytes": 1551478,
+    "rate_headers": {}
+  },
+  {
+    "name": "qwen-openai",
+    "url": "https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope",
+    "status": 200,
+    "final_url": "https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope",
+    "bytes": 167834,
+    "rate_headers": {}
+  },
+  {
+    "name": "deepseek-tools",
+    "url": "https://api-docs.deepseek.com/guides/tool_calls",
+    "status": 200,
+    "final_url": "https://api-docs.deepseek.com/guides/tool_calls/",
+    "bytes": 78573,
+    "rate_headers": {}
+  },
+  {
+    "name": "agentarts-docs",
+    "url": "https://docs.huaweicloud.com/agentarts",
+    "error": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)>"
+  },
+  {
+    "name": "openalex-probe",
+    "url": "https://api.openalex.org/works?search=retrieval%20augmented%20generation&per-page=1",
+    "error": "HTTP Error 429: Too Many Requests"
+  },
+  {
+    "name": "crossref-probe",
+    "url": "https://api.crossref.org/works?query.bibliographic=retrieval%20augmented%20generation&rows=1",
+    "status": 200,
+    "final_url": "https://api.crossref.org/works?query.bibliographic=retrieval%20augmented%20generation&rows=1",
+    "bytes": 1224,
+    "rate_headers": {
+      "x-rate-limit-limit": "1",
+      "x-rate-limit-interval": "1s"
+    }
+  },
+  {
+    "name": "arxiv-probe",
+    "url": "https://export.arxiv.org/api/query?search_query=all:retrieval&max_results=1",
+    "status": 200,
+    "final_url": "https://export.arxiv.org/api/query?search_query=all:retrieval&max_results=1",
+    "bytes": 2957,
+    "rate_headers": {}
+  },
+  {
+    "name": "s2-probe",
+    "url": "https://api.semanticscholar.org/graph/v1/paper/search?query=retrieval&limit=1&fields=title,year,url,externalIds",
+    "error": "HTTP Error 429: "
+  }
+]

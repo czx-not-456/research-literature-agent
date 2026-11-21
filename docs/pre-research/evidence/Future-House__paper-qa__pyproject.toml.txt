@@ -1,0 +1,143 @@
+Source: https://github.com/Future-House/paper-qa/blob/main/pyproject.toml
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=19150
+
+1: [build-system]
+2: build-backend = "setuptools.build_meta"
+3: requires = ["setuptools>=64", "setuptools_scm>=8"]
+4: 
+5: [dependency-groups]
+6: dev = [
+7:     "paper-qa-docling[dev]",
+8:     "paper-qa-nemotron[dev]",
+9:     "paper-qa-pymupdf[dev]",
+10:     "paper-qa-pypdf[dev]",
+11:     "paper-qa[dev]",
+12: ]
+13: 
+14: [project]
+15: authors = [
+16:     {email = "hello@futurehouse.org", name = "FutureHouse technical staff"},
+17: ]
+18: # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+19: classifiers = [
+20:     "Intended Audience :: Developers",
+21:     "License :: OSI Approved :: Apache Software License",
+22:     "Operating System :: OS Independent",
+23:     "Programming Language :: Python :: 3 :: Only",
+24:     "Programming Language :: Python :: 3.11",
+25:     "Programming Language :: Python :: 3.12",
+26:     "Programming Language :: Python :: 3.13",
+27:     "Programming Language :: Python :: 3.14",
+28:     "Programming Language :: Python",
+29:     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+30: ]
+31: dependencies = [
+32:     "anyio",
+33:     "fhaviary[llm]>=0.34",  # For type(action)=Message
+34:     "fhlmi>=1.10.0",  # For type(action)=Message and default temperature handling
+35:     "html2text",  # TODO: evaluate moving to an opt-in dependency
+36:     "httpx",
+37:     "httpx-aiohttp",
+38:     "litellm>=1.83.9,!=1.107.0",  # Exclude the compromised release
+39:     "numpy",
+40:     "paper-qa-pypdf",  # TODO: after https://peps.python.org/pep-0771/, make this opt-out if 'pymupdf' extra is specified`
+41:     "pybtex",
+42:     "pydantic-settings",
+43:     "pydantic~=2.0,>=2.10.1",  # Pin 2.10 for typing breaks
+44:     "rich",
+45:     "setuptools",  # TODO: remove after release of https://bitbucket.org/pybtex-devs/pybtex/pull-requests/46/replace-pkg_resources-with-importlib
+46:     "tantivy",
+47:     "tenacity",
+48:     "tiktoken>=0.4.0",
+49: ]
+50: description = "LLM Chain for answering questions from docs"
+51: dynamic = ["version"]
+52: keywords = ["question answering"]
+53: license = {file = "LICENSE"}
+54: maintainers = [
+55:     {email = "jamesbraza@gmail.com", name = "James Braza"},
+56:     {email = "michael.skarlinski@gmail.com", name = "Michael Skarlinski"},
+57:     {email = "white.d.andrew@gmail.com", name = "Andrew White"},
+58: ]
+59: name = "paper-qa"
+60: readme = "README.md"
+61: requires-python = ">=3.11,<3.15"
+62: 
+63: [project.optional-dependencies]
+67:     "ipykernel>=6.29",  # For running Jupter notebooks, and pin to keep recent
+68:     "ipython>=8",  # Pin to keep recent
+69:     "paper-qa[docling,image,ldp,nemotron,pypdf-media,pymupdf,typing,zotero,local,qdrant,office]",
+70:     "prek<0.2.15",  # Downpin for https://github.com/j178/prek/issues/1104
+71:     "pydantic~=2.11",  # Pin for start of model_fields deprecation
+79:     "pytest-timeout",
+80:     "pytest-timer[colorama]",
+81:     "pytest-xdist",
+82:     "pytest>=8",  # Pin to keep recent
+83:     "python-dotenv",
+84:     "pyzotero>=1.11.0",  # Lower pin for typing fix on Zotero.dump in https://github.com/urschrei/pyzotero/issues/298
+85:     "ty",
+103: ]
+104: pymupdf = ["paper-qa-pymupdf"]
+105: pypdf = ["paper-qa-pypdf"]
+106: pypdf-enhanced = ["paper-qa-pypdf[enhanced]"]
+107: pypdf-media = ["paper-qa-pypdf[media]"]
+108: qdrant = [
+109:     "qdrant-client",
+116: zotero = [
+117:     "paper-qa-pymupdf",
+118:     "pyzotero",
+119: ]
+143: [tool.markdown_toc_creator]
+144: horizontal-rule-style = "prettier"
+145: proactive = false
+146: 
+166: jobs = 0
+167: # List of plugins (as comma separated values of python module names) to load,
+168: # usually to register additional checkers.
+169: load-plugins = [
+182:     "consider-using-in",  # Rely on ruff PLR1714 for this
+183:     "cyclic-import",  # Let Python blow up
+184:     "dangerous-default-value",  # Rely on ruff W0102 for this
+185:     "empty-docstring",  # Let pep257 take care of docstrings
+200:     "no-member",  # Buggy, SEE: https://github.com/pylint-dev/pylint/issues/8138
+201:     "no-value-for-parameter",  # Covered by static type checking
+202:     "not-callable",  # Don't care to enforce this
+203:     "protected-access",  # Don't care to enforce this
+214:     "too-many-locals",  # Rely on ruff PLR0914 for this
+215:     "too-many-positional-arguments",  # Rely on ruff PLR0917 for this
+216:     "too-many-public-methods",  # Rely on ruff PLR0904 for this
+217:     "too-many-return-statements",  # Rely on ruff PLR0911 for this
+234:     "wrong-import-order",  # Rely on ruff I001 for this
+235:     "wrong-import-position",  # Rely on ruff E402 for this
+236: ]
+237: # Enable the message, report, category or checker with the given id(s).
+274: filterwarnings = [
+275:     "ignore:The `dict` method is deprecated; use `model_dump` instead",  # SEE: https://github.com/BerriAI/litellm/issues/5987
+276:     "ignore:Use 'content=<...>' to upload raw bytes/text content:DeprecationWarning",  # SEE: https://github.com/BerriAI/litellm/issues/5986
+277:     "ignore:builtin type (SwigPyPacked|SwigPyObject|swigvarlink) has no __module__:DeprecationWarning:importlib._bootstrap",  # SEE: https://github.com/pymupdf/PyMuPDF/issues/3931 --> https://github.com/swig/swig/issues/2881#issuecomment-2332652634
+278:     'ignore:pkg_resources is deprecated as an API.:DeprecationWarning:pybtex',  # SEE: https://bitbucket.org/pybtex-devs/pybtex/issues/169/replace-pkg_resources-with
+279: ]
+280: markers = [
+281:     "live_api: Requires credentials for a live provider API",
+282:     "offline: Runs without external API credentials using local data, mocks, or VCR cassettes",
+283: ]
+284: # List of directories that should be searched for tests when no specific directories,
+476:     "RUF052",  # Previous code uses leading underscore to indicate throwaway
+477:     "S311",  # Ok to use python random
+478:     "SLF001",  # Overly pedantic
+479:     "T201",  # Overly pedantic
+542: in_place = true
+543: spaces_before_inline_comment = 2  # Match Python PEP 8
+544: spaces_indent_inline_array = 4  # Match Python PEP 8
+545: trailing_comma_inline_array = true
+546: 
+555: aadd = "aadd"
+556: flate = "flate"  # FlateDecode is a valid PDF compression method
+557: ser = "ser"  # ser is short for serialized
+558: 
+569: paper-qa-nemotron = {workspace = true}
+570: paper-qa-pymupdf = {workspace = true}
+571: paper-qa-pypdf = {workspace = true}
+572: 
+573: [tool.uv.workspace]

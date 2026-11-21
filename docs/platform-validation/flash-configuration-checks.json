@@ -1,0 +1,175 @@
+{
+  "scope": "Config document and source checks, not platform or live model tests",
+  "passed": 42,
+  "total": 42,
+  "checks": [
+    {
+      "name": "utf8:acceptance-results.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:official-capability-check.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:deepseek-integration.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "link:competition-requirements-analysis.md:../../赛题要求.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:deepseek-integration.md",
+      "passed": true
+    },
+    {
+      "name": "link:deepseek-integration.md:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:managed-agent-validation-steps.md:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "link:managed-agent-validation-steps.md:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:scripts/probe_external_search.py",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:evidence/crossref-search-probe.json",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:deepseek-integration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-and-cost-assessment.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-and-cost-assessment.md:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-and-cost-assessment.md:deepseek-integration.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-and-cost-assessment.md:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-provider-setup.md:deepseek-integration.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-provider-setup.md:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:official-capability-check.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:deepseek-integration.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:deepseek-flash-configuration.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "link:resource-preflight.md:model-provider-setup.md",
+      "passed": true
+    },
+    {
+      "name": "source-and-unexecuted-platform",
+      "passed": true
+    }
+  ]
+}

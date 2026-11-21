@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-21",
+  "image": "swr.cn-southwest-2.myhuaweicloud.com/research-literature-agent/literature-runtime-probe:0.1.1",
+  "manifest_digest": "sha256:dffd1d98ce30533a3b1a666e99c494905c5be5fa293572c27633514581971b1b",
+  "config_digest": "sha256:0805465b213c2e30ebbf1a36e3051ee87a5a8de1639ad8e9fa2bbf2e674ceedb",
+  "platform": "linux/amd64",
+  "verified_remote": true,
+  "local_smoke": {
+    "ping_http": 200,
+    "invalid_query": {
+      "status": "error",
+      "stage": "input",
+      "code": "invalid_query"
+    },
+    "isolated_identity": {
+      "status": "error",
+      "stage": "identity",
+      "code": "metadata_credentials_unavailable"
+    }
+  },
+  "identity": "Official Runtime MetadataProvider by default; named Agent Identity STS provider remains optional",
+  "cloud_runtime_created": false
+}

@@ -1,0 +1,11 @@
+{
+  "name": "deepseek-current-thinking",
+  "url": "https://api-docs.deepseek.com/guides/thinking_mode",
+  "utc": "2026-11-17T12:53:26.133861+00:00",
+  "status": 200,
+  "final_url": "https://api-docs.deepseek.com/guides/thinking_mode/",
+  "bytes": 120749,
+  "sha256": "a687ee6e0262ae12554243942a374e8952b81397e5159fba8ba49266f3595b22",
+  "content_status": "needs_content_review",
+  "text_preview": "Thinking Mode | DeepSeek API Docs\nSkip to main content\nThe full suite of DeepSeek application APIs is now available: web search, file input, URL reading, model safety, ASR, TTS and more.\nClick here to view the guide\nDeepSeek API Docs\nResources\nIntegrations\nAPI Status\nFAQ\nEnglish\nEnglish\n中文（中国）\nDeepSeek Platform\n中\nQuick Start\nAPI Guides\nAPI Reference\nNews\nChange Log\nModel Capabilities\nThinking Mode\nMulti-round Conversation\nChat Prefix Completion (Beta)\nFIM Completion (Beta)\nJSON Output\nTool Calls\nContext Caching\nVision\nFiles API\nTool APIs\nSearch & Fetch\nOCR\nText to Speech\nSpeech to Text\nBuild a Chatbot\nOverview\nWeb Tools\nFile Parsing\nConversation Title\nUser Metadata Marker\nModel Content Safety\nProtocols\nUsing the Responses API\nUsing the Anthropic API\nModel Capabilities\nThinking Mode\nOn this page\nCopy Markdown\nCopy Markdown\nOpen Markdown\nThinking Mode\nThe DeepSeek model supports the thinking mode: before outputting the final answer, the model will first output a chain-of-thought reasoning to improve the accuracy of the final response.\nThinking Mode Toggle and Effort Control\n​\nControl Parameter (OpenAI Format)\nControl Parameter (Anthropic Format)\nControl Parameter (Responses API Format)\nThinking Mode Toggle\n(1)\n{\"thinking\": {\"type\": \"enabled/disabled\"}}\n{\"reasoning\": {\"effort\": \"none/low/high/max\"}}\n(\nnone\ndisables thinking mode)\nThinking Effort Control\n(2)\n{\"reasoning_effort\": \"low/high/max\"}\n{\"output_config\": {\"effort\": \"low/high/max\"}}\n(1) Thinking mode is enabled by default, with the default effort being\nhigh\n(2) The mapping between the effort set by the user and the model"
+}

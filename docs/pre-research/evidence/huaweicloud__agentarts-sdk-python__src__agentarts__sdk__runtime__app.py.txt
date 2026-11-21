@@ -1,0 +1,101 @@
+Source: https://github.com/huaweicloud/agentarts-sdk-python/blob/main/src/agentarts/sdk/runtime/app.py
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=28185
+
+1: """
+2: AgentArts Runtime Application
+3: 
+4: Provides the core HTTP/WebSocket server that wraps user-defined agent
+5: entrypoints and exposes them through a standardised API surface
+6: compatible with the Huawei Cloud AgentArts control plane.
+7: 
+8: Endpoints
+9: ---------
+10: - ``POST /invocations``  – invoke the agent entrypoint
+11: - ``GET  /ping``          – health-check / liveness probe
+12: - ``WS   /ws``            – bidirectional streaming communication
+13: 
+14: The application uses :mod:`starlette` as the ASGI framework so that it
+15: can run under any ASGI server (uvicorn, hypercorn, etc.) without
+16: pulling in the full FastAPI dependency at runtime.
+17: """
+18: 
+19: from __future__ import annotations
+20: 
+21: import asyncio
+22: import contextvars
+23: import inspect
+24: import json
+25: import logging
+26: import os
+27: import socket
+28: import subprocess
+29: import threading
+30: import time
+31: import uuid
+32: from concurrent.futures import ThreadPoolExecutor
+33: from pathlib import Path
+34: from typing import (
+35:     TYPE_CHECKING,
+36:     Any,
+37:     Literal,
+38: )
+39: 
+40: from starlette.applications import Starlette
+41: from starlette.responses import JSONResponse, Response, StreamingResponse
+42: from starlette.routing import Route, WebSocket, WebSocketRoute
+43: from starlette.websockets import WebSocket, WebSocketDisconnect
+44: 
+45: from .context import AgentArtsRuntimeContext, RequestContext
+46: from .model import ACCESS_TOKEN_HEADER, SESSION_HEADER, USER_ID_HEADER, PingStatus
+47: 
+48: if TYPE_CHECKING:
+49:     from collections.abc import AsyncGenerator, Callable, Generator, Sequence
+50: 
+51:     from starlette.middleware import Middleware
+52:     from starlette.requests import Request
+53:     from starlette.types import Lifespan
+54: 
+55: log = logging.getLogger(__name__)
+56: 
+57: 
+58: class AgentArtsRuntimeApp(Starlette):
+59:     """
+60:     ASGI application that hosts an agent entrypoint behind a standardised
+67:         @app.entrypoint
+68:         def my_handler(payload: dict):
+69:             return {"result": payload["input"].upper()}
+70: 
+71:         @app.ping
+72:         def health_check():
+73:             return {"status": "ok"}
+74: 
+75:         @app.websocket
+76:         async def ws_handler(websocket: WebSocket):
+77:             await websocket.accept()
+78:             while True:
+82: 
+83:     def __init__(
+84:         self,
+85:         debug: bool = False,
+105: 
+106:         routes = [
+107:             Route("/invocations", self._handle_invocation, methods=["POST"]),
+108:             Route("/ping", self._handle_ping, methods=["GET"]),
+109:             WebSocketRoute("/ws", self._handle_websocket),
+110:         ]
+111:         super().__init__(debug=debug, lifespan=lifespan, middleware=middleware, routes=routes)
+112: 
+113:     # ------------------------------------------------------------------
+116: 
+117:     def entrypoint(self, func: Callable) -> Callable:
+118:         """Register *func* as the main agent invocation handler."""
+119:         self.handlers["main"] = func
+122: 
+123:     def ping(self, func: Callable) -> Callable:
+124:         """Register *func* as the health-check handler."""
+125:         self._ping_handler = func
+127: 
+128:     def websocket(self, func: Callable) -> Callable:
+129:         """Regist
+[Selected excerpt only; full source available at URL above.]

@@ -1,0 +1,25 @@
+{
+  "image": "literature-runtime-probe:0.1.0",
+  "metadata": "sha256:ed1235c64f544d44b0c45e13f46f108e0842f0427bad678abaf6e0247cf4c5f9 linux/amd64 354470740",
+  "health_http": 200,
+  "input_result": {
+    "status": "error",
+    "stage": "input",
+    "code": "invalid_query"
+  },
+  "missing_workload_result": {
+    "status": "error",
+    "stage": "identity",
+    "code": "workload_token_missing"
+  },
+  "source": "Local Docker engine with installed official AgentArts SDK",
+  "wsl_reported": "3.0.5.0",
+  "docker_server": "29.9.3",
+  "sdk": "0.1.11",
+  "platform": "linux/amd64",
+  "base_image": "public.ecr.aws/docker/library/python@sha256:05a994d2344eb364cc186910f4fc8786a38215f39f00d0acc25bff33a08f4177",
+  "build_note": "Docker Hub auth endpoint timed out; ECR Public Docker Official Images namespace succeeded.",
+  "scope": "local HTTP checks only",
+  "cloud_push": false,
+  "cloud_deploy": false
+}

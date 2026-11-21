@@ -1,0 +1,166 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Crossref Literature Search",
+    "version": "0.1.0",
+    "description": "Read-only Crossref bibliography search for AgentArts workflow validation."
+  },
+  "servers": [
+    {
+      "url": "https://api.crossref.org"
+    }
+  ],
+  "paths": {
+    "/works": {
+      "get": {
+        "operationId": "search_papers",
+        "summary": "Search Crossref journal article metadata",
+        "description": "Returns registered bibliographic metadata. Results are candidates for review and do not include verified full text, excerpts, or page locations.",
+        "parameters": [
+          {
+            "name": "query.bibliographic",
+            "in": "query",
+            "required": true,
+            "description": "Short research topic or paper title.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "example": "retrieval augmented generation"
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": true,
+            "description": "Return one or two results for this validation.",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2
+              ]
+            },
+            "example": 2
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": true,
+            "description": "Use only the fixed journal article filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "type:journal-article"
+              ]
+            },
+            "example": "type:journal-article"
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": true,
+            "description": "Use the fixed list of bibliographic fields.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DOI,title,author,published,URL,type"
+              ]
+            },
+            "example": "DOI,title,author,published,URL,type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Crossref response. An empty message.items array means no results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "object",
+                      "required": [
+                        "items"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "DOI": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "URL": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "author": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "given": {
+                                      "type": "string"
+                                    },
+                                    "family": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "published": {
+                                "type": "object",
+                                "properties": {
+                                  "date-parts": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "integer"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Crossref rate limit. Report the limitation and stop this validation request."
+          },
+          "default": {
+            "description": "Crossref request failed. Report the error without inventing results."
+          }
+        }
+      }
+    }
+  }
+}

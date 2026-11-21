@@ -1,0 +1,31 @@
+{
+  "source": "User screenshots of the AgentArts Host Agent form",
+  "screenshots": [
+    "屏幕截图 2026-11-20 213932.png",
+    "屏幕截图 2026-11-20 214008.png",
+    "屏幕截图 2026-11-20 214029.png"
+  ],
+  "region": "cn-southwest-2",
+  "image_required": true,
+  "default": {
+    "execution_agency": "DefaultAgentArtsRuntimeAgency",
+    "ingress": "defaultgw",
+    "protocol": "HTTP",
+    "inbound_authentication": "IAM",
+    "memory_mib": 8192,
+    "cpu_millicores": 2000,
+    "listen_port": 8080,
+    "route": "strict match",
+    "outbound": "public",
+    "lts_logging": false
+  },
+  "strict_route": "/runtimes/{runtime_name}/invocations",
+  "pricing_text": "创建费用：限时免费",
+  "unknown": [
+    "runtime usage charges",
+    "SWR usage charges",
+    "quota semantics",
+    "usable STS provider and permissions",
+    "other available instance sizes"
+  ]
+}

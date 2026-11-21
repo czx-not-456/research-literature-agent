@@ -1,0 +1,107 @@
+{
+  "scope": "Document and source integrity only; platform operations not executed",
+  "checks": [
+    {
+      "name": "source-unchanged:屏幕截图 2026-11-17 175952.png",
+      "passed": true
+    },
+    {
+      "name": "source-unchanged:屏幕截图 2026-11-17 180026.png",
+      "passed": true
+    },
+    {
+      "name": "utf8:acceptance-results.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:official-capability-check.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:acceptance-results.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "link:competition-requirements-analysis.md:../../赛题要求.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:managed-agent-validation-steps.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:scripts/probe_external_search.py",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:evidence/crossref-search-probe.json",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:minimal-workflow-validation.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "name": "link:model-and-cost-assessment.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:official-capability-check.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:managed-agent-validation-steps.md",
+      "passed": true
+    },
+    {
+      "name": "link:official-capability-check.md:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:resource-preflight.md",
+      "passed": true
+    },
+    {
+      "name": "no-platform-success-or-next-stage",
+      "passed": true
+    }
+  ],
+  "passed": 25,
+  "total": 25
+}

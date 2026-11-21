@@ -1,0 +1,160 @@
+{
+  "scope": "Local artifacts and observed external-source response only; NOT platform acceptance",
+  "passed": 38,
+  "total": 38,
+  "checks": [
+    {
+      "name": "utf8:docs\\platform-validation\\acceptance-results.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\acceptance-results.md:competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\acceptance-results.md:official-capability-check.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\acceptance-results.md:minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\acceptance-results.md:model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:docs\\platform-validation\\competition-requirements-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\competition-requirements-analysis.md:../../赛题要求.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:docs\\platform-validation\\minimal-workflow-validation.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\minimal-workflow-validation.md:scripts/probe_external_search.py",
+      "passed": true
+    },
+    {
+      "name": "local-link:docs\\platform-validation\\minimal-workflow-validation.md:evidence/crossref-search-probe.json",
+      "passed": true
+    },
+    {
+      "name": "utf8:docs\\platform-validation\\model-and-cost-assessment.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:docs\\platform-validation\\official-capability-check.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:PROJECT_STATUS.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:docs/pre-research/github-project-comparison.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:docs/pre-research/technology-selection.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:docs/pre-research/model-service-comparison.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:docs/pre-research/academic-search-api-comparison.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:docs/pre-research/development-risk-analysis.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:PROJECT_STATUS.md:docs/platform-validation/acceptance-results.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:TODO.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:TODO.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:TECH_DECISIONS.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:TECH_DECISIONS.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:DEVELOPMENT_LOG.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:ORIGINAL_WORK.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:ORIGINAL_WORK.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "name": "utf8:THIRD_PARTY_COMPONENTS.md",
+      "passed": true
+    },
+    {
+      "name": "local-link:THIRD_PARTY_COMPONENTS.md:DEVELOPMENT_PLAN.md",
+      "passed": true
+    },
+    {
+      "name": "python-syntax:fetch_public_docs.py",
+      "passed": true
+    },
+    {
+      "name": "python-syntax:probe_external_search.py",
+      "passed": true
+    },
+    {
+      "name": "user-competition-file-unchanged",
+      "passed": true
+    },
+    {
+      "name": "real-search-schema",
+      "passed": true
+    },
+    {
+      "name": "probe-summary-matches-raw",
+      "passed": true
+    },
+    {
+      "name": "no-platform-success-claimed",
+      "passed": true
+    },
+    {
+      "name": "no-design-or-business",
+      "passed": true
+    },
+    {
+      "name": "official-doc-failures-not-body",
+      "passed": true
+    }
+  ],
+  "failures": []
+}

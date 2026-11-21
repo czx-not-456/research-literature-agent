@@ -1,0 +1,107 @@
+{
+  "updated_utc": "2026-11-18T08:26:56.274010+00:00",
+  "stage": 2,
+  "authorization": "granted_by_user",
+  "status": "in_progress_current_agent_created_tools_unconfigured",
+  "platform_acceptance": {
+    "create": "managed_agent_creation_observed_workflow_execution_unverified",
+    "orchestrate": "unverified_current_agent_has_no_builtin_tools_or_skills",
+    "deploy": "current_agent_detail_and_domain_label_visible_release_unverified",
+    "official_api": "unverified_no_external_request_response_for_current_agent",
+    "external_tool_from_platform": "unverified_current_agent_tool_counters_zero"
+  },
+  "local_external_search": "passed",
+  "local_empty_input_rejection": "passed",
+  "model_and_cost": "platform_text_success_model_id_usage_scope_and_cost_unverified",
+  "next_stage_authorized": false,
+  "console_region": {
+    "id": "cn-southwest-2",
+    "basis": "user URL plus visible screenshot region label",
+    "account_service_availability": "Playground Agent execution visible; broader permissions not inferred"
+  },
+  "console_entry_received": true,
+  "agentarts_workspace_verified": false,
+  "agentarts_product_page_observed": true,
+  "screenshot_evidence": "evidence/screenshot-review.json",
+  "beta_entitlement": "unverified",
+  "account_billing": "arrears_label_observed_effect_unverified",
+  "configuration": {
+    "model_options": "no_longer_blocking_current_agent_invocation",
+    "environment_options": "no_longer_blocking_current_agent_invocation",
+    "cause": "previous_add_provider_blocker_no_longer_current_upstream_service_not_configured",
+    "model_provider": "deepseek-provider_observed_in_current_agent_detail",
+    "add_provider_button": "form_accessible_observed",
+    "environment_form": "platform_execution_observed_environment_configuration_not_shown",
+    "protocol_options_observed": [
+      "标准OpenAI协议",
+      "Anthropic协议",
+      "华为云MaaS标准API V1"
+    ],
+    "provider_name_suggestion": "deepseek-provider",
+    "base_url_from_official_docs": "https://api.deepseek.com",
+    "model_service_name_suggestion": "deepseek-flash-probe",
+    "protocol_suggestion": "标准OpenAI协议",
+    "environment": "environment-huawei-cit_observed_bound",
+    "prompt": "displayed_as_double_dash",
+    "model_binding": "deepseek-flash_observed_not_live_call_test"
+  },
+  "latest_screenshot_evidence": "evidence/agent-huawei-cit-review.json",
+  "package_entitlement": {
+    "ui_notice": "historical_no_package_notice_not_used_as_current_add_provider_blocker",
+    "trial_entry": "visible_not_claimed",
+    "eligibility_and_terms": "current_trial_or_paid_package_details_unverified",
+    "current_provider_form_access": "observed"
+  },
+  "dependency_authorization": "completed_user_reported",
+  "model_service_source": {
+    "family": "DeepSeek",
+    "available_api": "user_confirmed",
+    "official_or_third_party": "official_confirmed_by_user",
+    "exact_model_id": "deepseek-flash_observed_in_current_agent_detail",
+    "account_console_url": "https://platform.deepseek.com/usage",
+    "user_reported_display_names": [
+      "DeepSeek V4.1 Flash",
+      "DeepSeek V4.1 Pro"
+    ],
+    "probe_api_model_id": "deepseek-flash",
+    "probe_id_evidence": "official_pricing_page_and_user_flash_family_report_not_live_test",
+    "pro_api_id": "not_assumed_from_display_name"
+  },
+  "maas_availability": "unknown_not_required_for_existing_api_route",
+  "managed_agent_creation": "passed_user_report_and_current_detail_screenshot",
+  "playground_text_invocation": "unverified_for_current_agent_previous_agent_success_preserved",
+  "agent_display_identifier": "agent-huawei-cit",
+  "displayed_usage_counters": {
+    "input": 45877,
+    "output": 11,
+    "total": 45888
+  },
+  "usage_scope_and_cost": "unverified_avoid_repeated_calls_until_checked",
+  "outbound_identity": {
+    "type_recommended": "API Key",
+    "suggested_name": "deepseek-api-key",
+    "create_status": "identity_available_in_dropdown_screenshot",
+    "binding_status": "selected_in_unsaved_supplier_form",
+    "evidence": "evidence/outbound-identity-review.json",
+    "authentication_header_configuration": {
+      "location": "header",
+      "parameter_name": "Authorization",
+      "prefix": "Bearer",
+      "scope": "recommended_not_wire_verified"
+    },
+    "access_control_evidence": "evidence/provider-access-control-review.json"
+  },
+  "previous_playground_evidence": {
+    "agent_display_identifier": "agent-tg2vc3r0",
+    "status": "passed_screenshot_evidence",
+    "file": "evidence/playground-success-review.json"
+  },
+  "agent_id": "7d00eebf-18eb-40ed-8818-3370096ef391",
+  "current_agent_tools": {
+    "builtin": 0,
+    "skills": 0,
+    "source": "detail_screenshot"
+  },
+  "current_agent_usage": "not_observed",
+  "access_domain": "truncated_need_actual_copy"
+}

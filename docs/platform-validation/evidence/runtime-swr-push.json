@@ -1,0 +1,10 @@
+{
+  "image": "swr.cn-southwest-2.myhuaweicloud.com/research-literature-agent/literature-runtime-probe:0.1.0",
+  "manifest_digest": "sha256:b65235fecd642896213ce7eb03b452d0801dcf3274ff5087494e5faeaaedc241",
+  "config_digest": "sha256:3df368270d7b5a3c0c5e86676a86c9ffa45adfb10615059bda8bc63af5bd3a69",
+  "verified_remote": true,
+  "platform": "linux/amd64",
+  "verification": "docker push succeeded; remote tag and digest manifests have matching configuration and layers",
+  "local_smoke_evidence": "runtime-local-container-smoke.json",
+  "runtime_deployed": false
+}

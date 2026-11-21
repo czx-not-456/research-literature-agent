@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}文献库{% endblock %} · 研读工作台</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='library.css') }}">
+  <script src="{{ url_for('static', filename='library.js') }}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+<div class="workspace">
+  <aside class="rail">
+    <a href="{{ url_for('home') }}" class="wordmark">
+      <span class="monogram" aria-hidden="true">研</span>
+      <span><strong>研读工作台</strong><small>科研文献库</small></span>
+    </a>
+    <nav class="topics" aria-label="研究课题">
+      <div class="rail-heading"><h2>研究课题</h2>{% if topics %}<span>{{ topics|length }}</span>{% endif %}</div>
+      {% for item in topics %}
+      <a class="topic-link{% if topic and topic.id == item.id %} current{% endif %}"
+         {% if topic and topic.id == item.id %}aria-current="true"{% endif %}
+         href="{{ url_for('topic', topic_id=item.id) }}">
+        <span>{{ item.name }}</span><small>{{ item.document_count }}</small>
+      </a>
+      {% else %}
+      <p class="rail-empty">暂无课题</p>
+      {% endfor %}
+    </nav>
+    <details class="new-topic"{% if not topics %} open{% endif %}>
+      <summary><span aria-hidden="true">＋</span> 创建课题</summary>
+      <form action="{{ url_for('add_topic') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>课题名称<input required name="name" maxlength="100" placeholder="例如：检索增强生成"></label>
+        <label>课题简介 <small>可选</small><textarea rows="2" name="description" maxlength="600"></textarea></label>
+        <button type="submit" class="button primary">创建</button>
+      </form>
+    </details>
+  </aside>
+  <main id="main" class="mainarea">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for kind, message in messages %}
+      <div class="notice {{ kind }}" role="{{ 'alert' if kind == 'error' else 'status' }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

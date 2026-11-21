@@ -1,0 +1,58 @@
+{
+  "scope": "User-run AgentArts Gateway console tool debug; no Managed Agent invocation",
+  "date": "2026-11-20",
+  "region": "cn-southwest-2",
+  "gateway": "research-literature-mcp-gateway",
+  "target": {
+    "name": "crossref-search",
+    "type": "REST API",
+    "status_shown": "在线"
+  },
+  "tool": "crossref-search_search_papers",
+  "gateway_authentication_shown": "IAM",
+  "detail_screenshot": "屏幕截图 2026-11-20 171910.png",
+  "debug_screenshot": "屏幕截图 2026-11-20 171848.png",
+  "debug_screenshot_jsonrpc_id": "10a75a44-c36c-47f5-9848-2f0e65403b1d",
+  "arguments_shown": {
+    "query": {
+      "filter": "type:journal-article",
+      "query.bibliographic": "retrieval augmented generation",
+      "rows": 2,
+      "select": "DOI,title,author,published,URL,type"
+    }
+  },
+  "select_evidence": "The value is truncated in the debug screenshot. The full configured enum is in the imported OAS.",
+  "supplied_response_excerpt": {
+    "id": "2d1a3e86-b878-4dc7-98f7-3209dc4acf3e",
+    "jsonrpc": "2.0",
+    "result": {
+      "isError": false,
+      "structuredContent": {
+        "status": "ok",
+        "message-type": "work-list",
+        "message": {
+          "items-per-page": 2,
+          "items": [
+            {
+              "DOI": "10.21275/sr251104092705",
+              "URL": "https://doi.org/10.21275/sr251104092705",
+              "title": [
+                "Retrieval-Augmented Generation: Enhancing AI with Reliable Knowledge."
+              ],
+              "type": "journal-article"
+            },
+            {
+              "DOI": "10.36085/jsai.v9i1.9897",
+              "URL": "https://doi.org/10.36085/jsai.v9i1.9897",
+              "title": [
+                "Evaluation of Retrieval Methods in Domain-Specific Chatbots Based on Retrieval-Augmented Generation",
+                "Evaluasi Metode Retrieval pada Chatbot Domain Khusus Berbasis Retrieval-Augmented Generation"
+              ],
+              "type": "journal-article"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

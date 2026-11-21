@@ -1,0 +1,19 @@
+{
+  "file": "屏幕截图 2026-11-17 165738.png",
+  "sha256": "37c0cadd2fe4b99186710c1812f4996911d0d68e8d1f82f2935a65f362a18b75",
+  "visual": [
+    "model required-field message",
+    "管理模型",
+    "创建环境",
+    "工具与Skill",
+    "权限与访问控制",
+    "可观测配置",
+    "高级配置"
+  ],
+  "user_report": {
+    "model_options": "empty",
+    "environment_options": "empty"
+  },
+  "boundary": "Screenshot selectors are closed; empty dropdowns are user-reported. Required-field error is not a permission error.",
+  "cause": "unconfirmed"
+}

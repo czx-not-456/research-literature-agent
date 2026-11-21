@@ -1,0 +1,213 @@
+Source: https://github.com/infiniflow/ragflow/blob/main/internal/handler/chunk.go
+Retrieved: 2026-11-16
+Snapshot: selected line-numbered excerpts; capped; upstream chars=20839
+
+1: //  Copyright 2026 The InfiniFlow Authors. All Rights Reserved.
+2: //
+3: //  Licensed under the Apache License, Version 2.0 (the "License");
+4: //  you may not use this file except in compliance with the License.
+5: //  You may obtain a copy of the License at
+6: //
+7: //      http://www.apache.org/licenses/LICENSE-2.0
+8: //
+9: //  Unless required by applicable law or agreed to in writing, software
+10: //  distributed under the License is distributed on an "AS IS" BASIS,
+11: //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+12: //  See the License for the specific language governing permissions and
+13: //  limitations under the License.
+14: //
+15: 
+16: package handler
+17: 
+18: import (
+19: 	"context"
+20: 	"encoding/json"
+21: 	"errors"
+22: 	"fmt"
+23: 	"io"
+24: 	"net/http"
+25: 	"ragflow/internal/common"
+26: 	"strings"
+27: 
+28: 	"github.com/gin-gonic/gin"
+29: 	"go.uber.org/zap"
+30: 
+31: 	"ragflow/internal/service"
+32: )
+33: 
+34: // chunkService is the consumer-side interface for ChunkHandler's service dependency.
+35: type chunkService interface {
+36: 	Get(ctx context.Context, req *service.GetChunkRequest) (*service.GetChunkResponse, error)
+37: 	List(ctx context.Context, req *service.ListChunksRequest) (*service.ListChunksResponse, error)
+38: 	SwitchChunks(ctx context.Context, datasetID, documentID string, availableInt int, chunkIDs []string) error
+39: 	UpdateChunk(ctx context.Context, req *service.UpdateChunkRequest) error
+40: 	RemoveChunks(ctx context.Context, req *service.RemoveChunksRequest) (int64, error)
+41: 	Parse(ctx context.Context, datasetID string, req *service.ParseFileRequest) (map[string]interface{}, common.ErrorCode, error)
+42: 	AddChunk(ctx context.Context, req *service.AddChunkRequest) (*service.AddChunkResponse, error)
+43: 	StopParsing(ctx context.Context, datasetID string, req service.StopParsingRequest) (*service.StopParsingResponse, common.ErrorCode, error)
+44: }
+45: 
+46: // ChunkHandler chunk handler
+47: type ChunkHandler struct {
+48: 	chunkService chunkService
+49: 	userService  *service.UserService
+50: }
+51: 
+52: // NewChunkHandler create chunk handler
+53: func NewChunkHandler(chunkService chunkService, userService *service.UserService) *ChunkHandler {
+54: 	return &ChunkHandler{
+55: 		chunkService: chunkService,
+56: 		userService:  userService,
+57: 	}
+58: }
+59: 
+60: // Get retrieves a chunk by ID.
+63: // @Tags chunks
+64: // @Param dataset_id path string true "Dataset ID"
+65: // @Param document_id path string true "Document ID"
+66: // @Param chunk_id path string true "Chunk ID"
+67: // @Success 200 {object} map[string]interface{}
+68: // @Router /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks/{chunk_id} [get]
+69: func (h *ChunkHandler) Get(c *gin.Context) {
+70: 
+71: 	datasetID := c.Param("dataset_id")
+72: 	documentID := c.Param("document_id")
+73: 	chunkID := c.Param("chunk_id")
+74: 	if datasetID == "" || documentID == "" || chunkID == "" {
+75: 		common.Respond(c, http.StatusBadRequest, 400, nil, "dataset_id, document_id and chunk_id are required")
+98: // Parse reparse the datasets' files
+99: func (h *ChunkHandler) Parse(c *gin.Context) {
+100: 	common.StartOperationLog(c, "start_dataset_chunk_parsing")
+101: 	defer common.FinishOperationLog(c)
+102: 
+103: 	datasetId := strings.TrimSpace(c.Param("dataset_id"))
+104: 	if datasetId == "" {
+105: 		common.Respond(c, http.StatusBadRequest, common.CodeBadRequest, nil, "dataset_id is required")
+125: 
+126: // ListChunks retrieves chunks for a document from path/query parameters.
+127: func (h *ChunkHandler) ListChunks(c *gin.Context) {
+128: 
+129: 	datasetID := c.Param("dataset_id")
+130: 	documentID := c.Param("document_id")
+131: 	if datasetID == "" || documentID == "" {
+132: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, "dataset_id and document_id are required")
+135: 
+136: 	page, size, err := common.ParsePagination(c.Request.URL.Query())
+137: 	if err != nil {
+138: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, err.Error())
+145: 		ChunkIDs:  queryStringList(c, "chunk_ids"),
+146: 		Page:      &page,
+147: 		Size:      &size,
+148: 		Keywords:  c.Query("keywords"),
+174: 
+175: func queryStringList(c *gin.Context, name string) []string {
+176: 	values := c.QueryArray(name)
+177: 	seen := make(map[string]struct{}, len(values))
+194: 
+195: func parseAvailableQuery(raw string) (int, bool, error) {
+196: 	switch strings.ToLower(strings.TrimSpace(raw)) {
+197: 	case "":
+207: 
+208: func (h *ChunkHandler) StopParsing(c *gin.Context) {
+209: 	common.StartOperationLog(c, "stop_dataset_chunk_parsing")
+210: 	defer common.FinishOperationLog(c)
+211: 
+212: 	datasetID := c.Param("dataset_id")
+213: 	if datasetID == "" {
+214: 		common.RespondError(c, common.CodeDataError, "dataset_id is required")
+248: // SwitchChunks enable or disable a chunk
+249: func (h *ChunkHandler) SwitchChunks(c *gin.Context) {
+250: 	common.StartOperationLog(c, "switch_dataset_chunks")
+251: 	defer common.FinishOperationLog(c)
+253: 	// Get required ID
+254: 	datasetID := strings.TrimSpace(c.Param("dataset_id"))
+255: 	if datasetID == "" {
+256: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, "dataset_id is required")
+259: 
+260: 	documentID := strings.TrimSpace(c.Param("document_id"))
+261: 	if documentID == "" {
+262: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, "document_id is required")
+301: 
+302: func parseStringSlice(raw interface{}) ([]string, bool) {
+303: 	items, ok := raw.([]interface{})
+304: 	if !ok {
+317: 
+318: func parseAvailableBody(rawBody map[string]interface{}) (int, error) {
+319: 	if raw, ok := rawBody["available_int"]; ok {
+320: 		switch v := raw.(type) {
+355: // believe it sent an image that the server dropped.
+356: func optionalBodyString(rawBody map[string]interface{}, field, typeMessage string) (*string, error) {
+357: 	raw, ok := rawBody[field]
+358: 	if !ok {
+371: // @Tags chunks
+372: // @Param request body service.UpdateChunkRequest true "update chunk"
+373: // @Success 200 {object} map[string]interface{}
+374: // @Router /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks/{chunk_id} [patch]
+375: func (h *ChunkHandler) UpdateChunk(c *gin.Context) {
+376: 	common.StartOperationLog(c, "update_dataset_chunk")
+377: 	defer common.FinishOperationLog(c)
+394: 	// Get required ID fields
+395: 	datasetID := strings.TrimSpace(c.Param("dataset_id"))
+396: 	if datasetID == "" {
+397: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, "dataset_id is required")
+400: 
+401: 	chunkID := strings.TrimSpace(c.Param("chunk_id"))
+402: 	if chunkID == "" {
+403: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, "chunk_id is required")
+407: 	// Get document_id from request
+408: 	documentID := strings.TrimSpace(c.Param("document_id"))
+409: 	if documentID == "" {
+410: 		common.Respond(c, http.StatusBadRequest, common.CodeArgumentError, nil, "document_id is required")
+419: 		"available":          true,
+420: 		"positions":          true,
+421: 		"image_base64":       true,
+422: 		"image_update_mode":  true,
+427: 		if field != "dataset_id" && field != "document_id" && field != "chunk_id" && !allowedFields[field] {
+428: 			common.Respond(c, http.StatusBadRequest, 400, nil, "Update field '"+field+"' is not supported. Updatable fields: content, important_keywords, questions, available, positions, image_base64, image_update_mode, tag_kwd, tag_feas")
+429: 			return
+430: 		}
+460: 	}
+461: 	if positions, ok := rawBody["positions"].([]interface{}); ok {
+462: 		req.Positions = positions
+463: 	}
+464: 	tagKwd, err := addChunkStringListField(rawFields, "tag_kwd", "`tag_kwd` is required to be a list", "`tag_kwd` must be a list of strings")
+483: 
+484: 	// Set path parameters
+485: 	req.DatasetID = datasetID
+486: 	req.DocumentID = documentID
+516: // @Tags chunks
+517: // @Param request body service.RemoveChunksRequest true "remove chunks request"
+518: // @Success 200 {object} map[string]interface{}
+519: // @Router /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks [delete]
+520: func (h *ChunkHandler) RemoveChunks(c *gin.Context) {
+521: 	common.StartOperationLog(c, "delete_dataset_chunks")
+522: 	defer common.FinishOperationLog(c)
+523: 
+524: 	datasetID := c.Param("dataset_id")
+525: 	docID := c.Param("document_id")
+526: 	if datasetID == "" || docID == "" {
+527: 		common.Respond(c, http.StatusBadRequest, 400, nil, "dataset_id and document_id are required")
+554: 
+555: func addChunkStringField(rawBody map[string]json.RawMessage, field string) (string, error) {
+556: 	raw, ok := rawBody[field]
+557: 	if !ok {
+566: 
+567: func addChunkStringPtrField(rawBody map[string]json.RawMessage, field string) (*string, error) {
+568: 	raw, ok := rawBody[field]
+569: 	if !ok {
+578: 
+579: func addChunkStringListField(rawBody map[string]json.RawMessage, field, listMessage, elementMessage string) ([]string, error) {
+580: 	raw, ok := rawBody[field]
+581: 	if !ok {
+602: // addChunkResponseMessage retains the service message and logs server-class failures.
+603: func addChunkResponseMessage(code common.ErrorCode, err error) string {
+604: 	if code == common.CodeServerError {
+605: 		common.Warn("add chunk failed", zap.String("error", err.Error()))
+609: 
+610: func (h *ChunkHandler) AddChunk(c *gin.Context) {
+611: 	common.StartOperationLog(c, "add_dataset_chunk")
+612: 	defer common.FinishOperationLog(c)
+615: 
+616: 	datasetID, documentID := strings.TrimSpace(c.Param("dataset_id")), strings.TrimSpace(c.Param("document_id"))
+617: 
+618: 	var rawBody map[string]json.RawMessage
