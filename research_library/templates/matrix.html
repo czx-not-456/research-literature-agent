@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}文献对比矩阵{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id) }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead"><h1>文献对比矩阵</h1></header>
+<section class="sheet" aria-labelledby="matrix-scope">
+  <div class="sheet-head">
+    <div><h2 id="matrix-scope">比较范围</h2><p>每次最多比较 {{ max_documents }} 篇文献。</p></div>
+  </div>
+  {% if documents %}
+  <form method="get" class="qa-form" action="{{ url_for('matrix.table', topic_id=topic.id) }}">
+    <input type="hidden" name="selected" value="1">
+    <fieldset>
+      <legend>文献</legend>
+      <div class="qa-docs">
+        {% for item in documents %}
+        <label><input type="checkbox" name="document" value="{{ item.id }}"{% if item.id in ids %} checked{% endif %}>
+          <span>{{ item.title }}{% if not item.text_page_count %}<small> · 无可提取文本</small>{% endif %}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <div class="matrix-controls">
+      <label for="matrix-field">比较字段
+        <select name="field" id="matrix-field">
+          <option value="">全部字段</option>
+          {% for key, label in labels.items() %}
+          <option value="{{ key }}"{% if options.field == key %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="matrix-check">
+        <input type="checkbox" name="linked" value="1"{% if linked %} checked{% endif %}> 只看有原文的字段
+      </label>
+      <button class="button" type="submit">应用筛选</button>
+    </div>
+  </form>
+  {% else %}
+  <div class="empty"><p>请先到课题文献库导入 PDF。</p></div>
+  {% endif %}
+</section>
+{% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+{% if selection %}
+<section class="sheet matrix-sheet" aria-labelledby="matrix-results">
+  <div class="sheet-head">
+    <div><h2 id="matrix-results">比较结果</h2>
+      <p>自动提取的摘录供核对。点击字段旁的「编辑」可填写结论和页码。</p>
+    </div>
+    <div class="topic-actions">
+      <form method="post" action="{{ url_for('matrix.table', topic_id=topic.id, document=ids, **options) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button primary" type="submit">从 PDF 提取候选</button>
+      </form>
+      <a class="button" href="{{ url_for('matrix.download', topic_id=topic.id, document=ids, **options) }}">导出 CSV</a>
+    </div>
+  </div>
+  {% if fields %}
+  <div class="matrix-scroll" role="region" tabindex="0" aria-label="文献对比结果">
+    <table class="matrix-table">
+      <thead><tr><th scope="col">比较字段</th>{% for item in selection %}
+        <th scope="col"><a href="{{ url_for('document', document_id=item.id) }}">{{ item.title }}</a></th>
+      {% endfor %}</tr></thead>
+      <tbody>
+        {% for field in fields %}<tr>
+          <th scope="row">{{ labels[field] }}</th>
+          {% for item in selection %}
+          {% set cell = cells.get((item.id, field)) %}
+          <td>
+            {% if cell and cell.text and (not linked or cell.page) %}
+              <p class="matrix-cell">{{ cell.text }}</p>
+              <p class="help">{{ '原文候选' if cell.source == 'excerpt' else '手动填写' }}</p>
+              {% if cell.page %}
+                <a href="{{ url_for('document', document_id=item.id, page=cell.page) }}">PDF 第 {{ cell.page }} 页</a>
+                {% if cell.source == 'manual' %}
+                <details><summary>查看引文</summary><blockquote>{{ cell.quote }}</blockquote></details>
+                {% endif %}
+              {% endif %}
+            {% else %}
+              <p class="help">{{ '暂无原文' if linked else '待补充' }}</p>
+            {% endif %}
+            <a class="matrix-edit" href="{{ url_for('matrix.edit', document_id=item.id, field=field, document=ids, linked=options.linked, view_field=options.field) }}"
+               aria-label="编辑{{ item.title }}的{{ labels[field] }}">编辑</a>
+          </td>
+          {% endfor %}
+        </tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty"><p>当前筛选下没有符合条件的原文字段。</p></div>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

@@ -42,6 +42,17 @@ CREATE TABLE IF NOT EXISTS pages (
     status TEXT NOT NULL CHECK (status IN ('available','truncated','no_text','extraction_failed')),
     PRIMARY KEY (document_id, number)
 );
+CREATE TABLE IF NOT EXISTS matrix_cells (
+    document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    field TEXT NOT NULL,
+    text TEXT NOT NULL,
+    source TEXT NOT NULL CHECK (source IN ('excerpt', 'manual')),
+    page INTEGER,
+    quote TEXT NOT NULL,
+    PRIMARY KEY (document_id, field),
+    FOREIGN KEY (document_id, page) REFERENCES pages(document_id, number) ON DELETE CASCADE
+);
+
 """
 TITLE_COLUMNS = "id, topic_id, filename, title, authors, abstract, keywords, year, doi, category, sources, page_count, text_page_count, created_at, updated_at"
 EDIT_COLUMNS = ("title", "authors", "abstract", "keywords", "year", "doi", "category")
@@ -87,6 +98,11 @@ class Library:
                 (topic_id, name, description),
             )
             return topic_id if result.rowcount else None
+
+    def rename_topic(self, topic_id, name):
+        with closing(self.connect()) as db, db:
+            result = db.execute("UPDATE OR IGNORE topics SET name = ? WHERE id = ?", (name, topic_id))
+            return bool(result.rowcount)
 
     def categories(self, topic_id):
         with closing(self.connect()) as db:
@@ -139,6 +155,45 @@ class Library:
                 for number, page in enumerate(extracted.pages, start=1)
             ))
             return document_id, True
+
+    def passage_rows(self, topic_id, document_ids):
+        placeholders = ", ".join("?" for _ in document_ids)
+        with closing(self.connect()) as db:
+            yield from db.execute(f"""
+                SELECT d.id AS document_id, d.title, p.number, p.text
+                FROM pages p JOIN documents d ON p.document_id = d.id
+                WHERE d.topic_id = ? AND d.id IN ({placeholders}) AND p.text <> ''
+                ORDER BY d.id, p.number
+            """, (topic_id, *document_ids))
+
+    def matrix_cells(self, document_ids):
+        if not document_ids:
+            return {}
+        placeholders = ", ".join("?" for _ in document_ids)
+        with closing(self.connect()) as db:
+            return {
+                (row["document_id"], row["field"]): row for row in db.execute(
+                    f"SELECT * FROM matrix_cells WHERE document_id IN ({placeholders})", tuple(document_ids)
+                )
+            }
+
+    def add_matrix_candidates(self, rows):
+        with closing(self.connect()) as db, db:
+            result = db.executemany("""
+                INSERT INTO matrix_cells(document_id, field, text, source, page, quote)
+                SELECT ?, ?, ?, 'excerpt', number, ? FROM pages WHERE document_id = ? AND number = ?
+                ON CONFLICT(document_id, field) DO NOTHING
+            """, ((doc_id, field, text, quote, doc_id, page) for doc_id, field, text, page, quote in rows))
+            return result.rowcount
+
+    def set_matrix_cell(self, document_id, field, text, page, quote):
+        with closing(self.connect()) as db, db:
+            db.execute("""
+                INSERT INTO matrix_cells(document_id, field, text, source, page, quote)
+                VALUES (?, ?, ?, 'manual', ?, ?)
+                ON CONFLICT(document_id, field) DO UPDATE SET
+                    text = excluded.text, source = excluded.source, page = excluded.page, quote = excluded.quote
+            """, (document_id, field, text, page, quote))
 
     def document(self, document_id):
         with closing(self.connect()) as db:

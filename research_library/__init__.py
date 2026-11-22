@@ -13,9 +13,15 @@ from flask import (
     Flask, abort, flash, redirect, render_template, request, send_file, session, url_for,
 )
 
+from .agentarts import AgentArtsError
+from .grounding import MAX_DOCUMENTS, MAX_QUESTION, answer_prompt, decode_answer, select_passages, verify_answer
 from .ingest import FIELD_LIMITS, MAX_PAGES, MAX_UPLOAD_BYTES, InvalidPDF, normalize_doi, parse_pdf
+from .matrix_routes import bp as matrix_blueprint
 from .preview import render_page_png
 from .store import Library
+
+MAX_BATCH_FILES = 10
+MAX_BATCH_BYTES = 96 * 1024 * 1024
 
 FIELD_SOURCES = {
     "pdf_metadata": "PDF 元数据",
@@ -45,6 +51,7 @@ def create_app(config=None):
     app.config.update(config or {})
     library = Library(app.config["LIBRARY_DB"])
     app.extensions["research_library"] = library
+    app.register_blueprint(matrix_blueprint)
 
     def csrf_token():
         if "csrf_token" not in session:
@@ -57,6 +64,8 @@ def create_app(config=None):
     def validate_form():
         if request.method != "POST":
             return
+        if request.endpoint == "upload":
+            request.max_content_length = MAX_BATCH_BYTES + 128 * 1024
         supplied = request.form.get("csrf_token", "")
         expected = session.get("csrf_token")
         if not expected or not supplied.isascii() or not hmac.compare_digest(expected, supplied):
@@ -122,34 +131,124 @@ def create_app(config=None):
             "library.html", topic=current, topics=library.list_topics(), query=query, category=category,
             categories=categories, documents=library.list_documents(topic_id, query, category),
             max_mib=MAX_UPLOAD_BYTES // (1024 * 1024), max_pages=MAX_PAGES,
+            max_batch_files=MAX_BATCH_FILES, max_batch_mib=MAX_BATCH_BYTES // (1024 * 1024),
+            rename_open=request.args.get("rename") == "1",
         )
+
+    @app.post("/topics/<uuid:topic_id>/name")
+    def rename_topic(topic_id):
+        topic_id = str(topic_id)
+        find_topic(topic_id)
+        name = request.form.get("name", "").strip()
+        retry = url_for("topic", topic_id=topic_id, rename=1)
+        if not 1 <= len(name) <= 100:
+            flash("请填写 1 至 100 个字符的课题名称。", "error")
+            return redirect(retry)
+        if not library.rename_topic(topic_id, name):
+            flash("已有同名课题，请使用其他名称。", "error")
+            return redirect(retry)
+        flash("课题名称已更新。", "success")
+        return redirect(url_for("topic", topic_id=topic_id))
+
+    @app.route("/topics/<uuid:topic_id>/qa", methods=["GET", "POST"])
+    def qa(topic_id):
+        topic_id = str(topic_id)
+        current = find_topic(topic_id)
+        documents = library.list_documents(topic_id, "", "")
+        available = {row["id"]: row for row in documents}
+        client = app.config.get("AGENTARTS_CLIENT")
+        requested = request.args.get("document", "")
+        selected = [requested] if requested in available else (list(available) if len(available) == 1 else [])
+        question = ""
+        passages, claims = [], []
+        message = None
+        status = 200
+        if request.method == "POST":
+            selected = list(dict.fromkeys(request.form.getlist("document")))
+            question = request.form.get("question", "").strip()
+            action = request.form.get("action")
+            if not 1 <= len(selected) <= MAX_DOCUMENTS or any(doc_id not in available for doc_id in selected):
+                message, status = f"请选择当前课题中的 1 至 {MAX_DOCUMENTS} 篇文献。", 400
+            elif not 1 <= len(question) <= MAX_QUESTION or action not in ("find", "answer"):
+                message, status = f"请输入 1 至 {MAX_QUESTION} 个字符的问题。", 400
+            else:
+                passages = select_passages(question, library.passage_rows(topic_id, selected))
+                if not passages:
+                    message = "找不到与问题匹配的可提取原文。可改用论文中的关键词，或检查 PDF 是否为扫描件。"
+                elif action == "answer":
+                    if client is None:
+                        message = "AgentArts 问答尚未启用。下方显示本地匹配的原文。"
+                    else:
+                        try:
+                            answer = decode_answer(client.ask(answer_prompt(question, passages)))
+                        except AgentArtsError as error:
+                            message = str(error)
+                        else:
+                            if answer is None:
+                                message = "AgentArts 未返回可核验的结构化回答。可以查看下方原文。"
+                            else:
+                                claims = verify_answer(answer, passages)
+        return render_template(
+            "qa.html", topic=current, topics=library.list_topics(), documents=documents,
+            selected=selected, question=question, passages=passages, claims=claims,
+            max_documents=MAX_DOCUMENTS, max_question=MAX_QUESTION, agentarts_enabled=client is not None,
+            message=message, submitted=request.method == "POST",
+        ), status
 
     @app.post("/topics/<uuid:topic_id>/documents")
     def upload(topic_id):
         topic_id = str(topic_id)
         find_topic(topic_id)
         destination = url_for("topic", topic_id=topic_id)
-        upload_file = request.files.get("pdf")
-        if not upload_file or not upload_file.filename:
+        files = [file for file in request.files.getlist("pdf") if file.filename]
+        if not files:
             flash("请选择要上传的 PDF 文件。", "error")
             return redirect(destination)
-        filename = re.sub(r"[\x00-\x1f\x7f]", "", upload_file.filename.replace("\\", "/").split("/")[-1])
-        if not filename.lower().endswith(".pdf"):
-            flash("目前只支持 PDF 文件。", "error")
+        if len(files) > MAX_BATCH_FILES:
+            flash(f"每批最多上传 {MAX_BATCH_FILES} 份 PDF。", "error")
             return redirect(destination)
-        filename = filename[:-4][:180] + ".pdf"
-        raw = upload_file.stream.read(MAX_UPLOAD_BYTES + 1)
-        if len(raw) > MAX_UPLOAD_BYTES:
-            flash("文件超过 24 MiB，请选择更小的 PDF。", "error")
-            return redirect(destination)
-        try:
-            extracted = parse_pdf(raw, filename)
-        except InvalidPDF as error:
-            flash(str(error), "error")
-            return redirect(destination)
-        document_id, inserted = library.add_document(topic_id, filename, raw, extracted)
-        flash("文献已导入。" if inserted else "此课题已有同一份 PDF，已打开现有记录。", "success")
-        return redirect(url_for("document", document_id=document_id, page=1))
+        total_bytes = 0
+        for file in files:
+            total_bytes += file.stream.seek(0, io.SEEK_END)
+            file.stream.seek(0)
+        if total_bytes > MAX_BATCH_BYTES:
+            abort(413)
+
+        added = duplicates = 0
+        failures = []
+        document_id = None
+        for file in files:
+            filename = re.sub(r"[\x00-\x1f\x7f]", "", file.filename.replace("\\", "/").split("/")[-1])
+            try:
+                if not filename.lower().endswith(".pdf"):
+                    raise InvalidPDF("目前只支持 PDF 文件。")
+                filename = filename[:-4][:180] + ".pdf"
+                raw = file.stream.read(MAX_UPLOAD_BYTES + 1)
+                if len(raw) > MAX_UPLOAD_BYTES:
+                    raise InvalidPDF("文件超过 24 MiB，请选择更小的 PDF。")
+                extracted = parse_pdf(raw, filename)
+                document_id, inserted = library.add_document(topic_id, filename, raw, extracted)
+                added += int(inserted)
+                duplicates += int(not inserted)
+            except InvalidPDF as error:
+                failures.append((filename, str(error)))
+
+        if len(files) == 1:
+            if document_id is None:
+                flash(failures[0][1], "error")
+                return redirect(destination)
+            flash("文献已导入。" if added else "此课题已有同一份 PDF，已打开现有记录。", "success")
+            return redirect(url_for("document", document_id=document_id, page=1))
+
+        flash(f"本批新增 {added} 篇，重复跳过 {duplicates} 份，导入失败 {len(failures)} 份。",
+              "error" if failures else "success")
+        # Keep flash feedback within the session-cookie size limit.
+        for filename, message in failures[:3]:
+            label = filename[:60] + ("…" if len(filename) > 60 else "")
+            flash(f"「{label or '未命名文件'}」{message}", "error")
+        if len(failures) > 3:
+            flash("其余失败文件可单独重新导入以查看原因。", "error")
+        return redirect(destination)
 
     @app.get("/documents/<uuid:document_id>")
     def document(document_id):
@@ -237,7 +336,7 @@ def create_app(config=None):
         messages = {
             400: "表单无效或已过期，请返回刷新后再试。",
             404: "找不到这条记录或对应的 PDF 页面。",
-            413: "上传文件超过 24 MiB，请选择更小的 PDF。",
+            413: "上传请求过大。每批最多 10 份 PDF，合计不超过 96 MiB。",
         }
         return render_template("error.html", topics=library.list_topics(), topic=None, code=error.code,
                                message=messages[error.code]), error.code

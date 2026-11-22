@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}编辑矩阵字段{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ destination }}">返回文献对比矩阵</a>
+<header class="pagehead"><div><h1>{{ field_label }}</h1><p class="description">{{ document.title }}</p></div></header>
+{% if message %}<p class="notice error" role="alert">{{ message }}</p>{% endif %}
+<section class="sheet" aria-label="编辑矩阵字段">
+  <form method="post" class="qa-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>内容<textarea name="text" rows="6" maxlength="{{ max_cell }}">{{ values.text }}</textarea></label>
+    <div class="matrix-edit-evidence">
+      <label>PDF 页码（可选）<input type="number" name="page" min="1" max="{{ document.page_count }}" value="{{ values.page or '' }}"></label>
+      <a href="{{ url_for('document', document_id=document.id, page=values.page if values.page is integer and values.page else 1) }}">查看论文</a>
+    </div>
+    <label>同页连续原文（随页码填写）<textarea name="quote" rows="4" maxlength="480">{{ values.quote }}</textarea></label>
+    <div class="qa-actions"><button class="button primary" type="submit">保存字段</button></div>
+  </form>
+</section>
+{% endblock %}

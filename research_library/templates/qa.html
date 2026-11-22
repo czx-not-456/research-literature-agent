@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}文献问答{% endblock %}
+{% block content %}
+{% macro source(passage, quote) %}
+  <div class="qa-source">
+    <a href="{{ url_for('document', document_id=passage.document_id, page=passage.number) }}">
+      {{ passage.title }} · PDF 第 {{ passage.number }} 页
+    </a>
+    <blockquote>{{ quote }}</blockquote>
+  </div>
+{% endmacro %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id) }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead"><h1>文献问答</h1></header>
+<section class="sheet" aria-labelledby="qa-scope">
+  <div class="sheet-head">
+    <div><h2 id="qa-scope">提问范围</h2><p>从当前课题选 1 至 {{ max_documents }} 篇论文。</p></div>
+  </div>
+  {% if documents %}
+  <form method="post" action="{{ url_for('qa', topic_id=topic.id) }}#qa-results" class="qa-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <fieldset>
+      <legend>文献</legend>
+      <div class="qa-docs">
+      {% for item in documents %}
+        <label>
+          <input type="checkbox" name="document" value="{{ item.id }}"{% if item.id in selected %} checked{% endif %}>
+          <span>{{ item.title }}{% if not item.text_page_count %}<small> · 无可提取文本</small>{% endif %}</span>
+        </label>
+      {% endfor %}
+      </div>
+    </fieldset>
+    <label for="qa-question">问题
+      <textarea id="qa-question" name="question" rows="3" maxlength="{{ max_question }}"
+                required placeholder="例如：论文使用了哪些评价指标？">{{ question }}</textarea>
+    </label>
+    <div class="qa-actions">
+      <button class="button" type="submit" name="action" value="find">查找原文</button>
+      <button class="button primary" type="submit" name="action" value="answer"
+              aria-describedby="qa-cloud-help"{% if not agentarts_enabled %} disabled{% endif %}>让 AgentArts 回答</button>
+    </div>
+    {% if agentarts_enabled %}
+    <p class="help" id="qa-cloud-help">选择 AgentArts 回答时，会发送问题与匹配的原文摘录，并可能产生调用费用。</p>
+    {% else %}
+    <p class="help" id="qa-cloud-help">AgentArts 尚未启用。用 --agentarts 启动并配置 IAM 后可以提交云端问答。</p>
+    {% endif %}
+  </form>
+  {% else %}
+  <div class="empty"><p>请先到课题文献库导入 PDF。</p></div>
+  {% endif %}
+</section>
+
+{% if submitted %}
+<div id="qa-results">
+  {% if message %}<p class="notice" role="status">{{ message }}</p>{% endif %}
+  {% if claims %}
+  <section class="sheet" aria-labelledby="qa-answer">
+    <div class="sheet-head"><div><h2 id="qa-answer">AgentArts 回答</h2>
+      <p>引文在本地逐字核对。模型推断需要结合原文判断。</p>
+    </div></div>
+    <ol class="qa-results">
+    {% for claim in claims %}
+      <li>
+        {% if claim.kind == 'direct' %}
+          <h3 class="qa-class direct">原文摘录 · 已核对</h3>
+        {% elif claim.kind == 'inference' %}
+          <h3 class="qa-class inference">模型推断</h3>
+          <p class="qa-claim">{{ claim.text }}</p>
+        {% else %}
+          <h3 class="qa-class unsupported">缺乏证据</h3>
+          <p class="help">此条结论缺少可核对的原文支持。</p>
+        {% endif %}
+        {% for citation in claim.citations %}{{ source(citation.passage, citation.quote) }}{% endfor %}
+      </li>
+    {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+  {% if passages %}
+  <section class="sheet" aria-labelledby="qa-matches">
+    <div class="sheet-head"><div><h2 id="qa-matches">匹配的原文</h2>
+      <p>在所选 PDF 页文本中找到 {{ passages|length }} 处候选片段。</p></div>
+    </div>
+    <ul class="qa-results">
+    {% for passage in passages %}<li>{{ source(passage, passage.text) }}</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

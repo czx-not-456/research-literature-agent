@@ -12,19 +12,40 @@
 <header class="pagehead">
   <div>
     <p class="eyebrow">课题文献库</p>
-    <h1>{{ topic.name }}</h1>
+    <div class="topic-title">
+      <h1>{{ topic.name }}</h1>
+      <details class="rename-topic" data-rename-topic{% if rename_open %} open{% endif %}>
+        <summary class="button">编辑名称</summary>
+        <form method="post" action="{{ url_for('rename_topic', topic_id=topic.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="topic-name">课题名称</label>
+          <input id="topic-name" name="name" value="{{ topic.name }}" maxlength="100" required>
+          <button type="submit" class="button primary">保存名称</button>
+        </form>
+      </details>
+    </div>
     {% if topic.description %}<p class="description">{{ topic.description }}</p>{% endif %}
   </div>
-  <details class="upload" {% if not documents and not query and not category %}open{% endif %}>
-    <summary class="button primary"><span aria-hidden="true">＋</span> 导入 PDF</summary>
-    <form method="post" action="{{ url_for('upload', topic_id=topic.id) }}" enctype="multipart/form-data" data-upload>
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label for="pdf">选择一份 PDF</label>
-      <input type="file" name="pdf" id="pdf" accept=".pdf,application/pdf" required>
-      <p class="help">每份不超过 {{ max_mib }} MiB、{{ max_pages }} 页。</p>
-      <button type="submit" class="button primary">上传并解析</button>
-    </form>
-  </details>
+  <div class="topic-actions">
+    <a class="button" href="{{ url_for('qa', topic_id=topic.id) }}">文献问答</a>
+    <a class="button" href="{{ url_for('matrix.table', topic_id=topic.id) }}">对比矩阵</a>
+    <details class="upload" {% if not documents and not query and not category %}open{% endif %}>
+      <summary class="button primary"><span aria-hidden="true">＋</span> 导入 PDF</summary>
+      <form method="post" action="{{ url_for('upload', topic_id=topic.id) }}" enctype="multipart/form-data"
+            data-upload data-max-files="{{ max_batch_files }}" data-max-mib="{{ max_mib }}"
+            data-max-batch-mib="{{ max_batch_mib }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="pdf">选择 PDF（可多选）</label>
+        <input type="file" name="pdf" id="pdf" accept=".pdf,application/pdf" aria-describedby="upload-limits" multiple required>
+        <div class="upload-queue" data-upload-queue hidden>
+          <p class="help" data-upload-status role="status"></p>
+          <ul data-upload-list aria-label="待上传 PDF"></ul>
+        </div>
+        <p class="help" id="upload-limits">每批最多 {{ max_batch_files }} 份、共 {{ max_batch_mib }} MiB。每份最多 {{ max_mib }} MiB、{{ max_pages }} 页。</p>
+        <button type="submit" class="button primary">上传并解析</button>
+      </form>
+    </details>
+  </div>
 </header>
 <section class="sheet" aria-labelledby="papers-title">
   <div class="sheet-head">

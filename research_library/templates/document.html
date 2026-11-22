@@ -14,6 +14,7 @@
     </div>
     <p class="help">{{ entry.filename }}{% if entry.doi %} · DOI {{ entry.doi }}{% endif %}</p>
   </div>
+  <a class="button" href="{{ url_for('qa', topic_id=topic.id, document=entry.id) }}">问这篇论文</a>
 </header>
 <section class="sheet reader" aria-labelledby="reader-title">
   <div class="sheet-head reader-head">
