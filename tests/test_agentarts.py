@@ -85,5 +85,19 @@ class AgentArtsTransportTest(unittest.TestCase):
                 AgentArtsChat(endpoint, "agent", "cn-southwest-2", "ak", "sk")
 
 
+    def test_http_diagnostics_only_return_allowlisted_codes_and_fixed_hints(self):
+        body = json.dumps({
+            "error_code": "APIGW.0301", "request_id": "318656a7b2c5bea7edb00296f0d896ce",
+            "error_msg": "signature expired, private-debug-text",
+        }).encode()
+        self.client._opener.open.side_effect = HTTPError("", 401, "Authentication", {}, io.BytesIO(body))
+        with self.assertRaises(AgentArtsError) as caught:
+            self.client.ask("public question")
+        message = str(caught.exception)
+        self.assertIn("APIGW.0301", message)
+        self.assertIn("318656a7b2c5bea7edb00296f0d896ce", message)
+        self.assertIn("同步 Windows 系统时钟", message)
+        self.assertNotIn("private-debug-text", message)
+
 if __name__ == "__main__":
     unittest.main()

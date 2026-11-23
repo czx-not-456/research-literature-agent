@@ -34,6 +34,12 @@ py -3 -m venv .venv-library
 
 在课题内打开「对比矩阵」，选择文献并点击「从 PDF 提取候选」。可核对引文、修改字段、按字段或是否有证据筛选，并导出 CSV。[功能与验收](docs/design/literature-matrix.md)
 
+## 调研报告
+
+在课题页点击「调研报告」，选择文献生成本地初稿。可以单独保存或重建章节，查看原文证据并下载 Markdown 和 Word。[报告使用与验收](docs/design/literature-report.md)
+
+若 AgentArts 问答返回 HTTP 401，参照运行时域名、入站认证和本机 IAM 配置的核对步骤。[401 联调记录](docs/platform-validation/managed-chat-401.md)
+
 运行集成测试：
 
 ```powershell

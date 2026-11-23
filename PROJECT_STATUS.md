@@ -1,5 +1,10 @@
 # 项目状态
 
+## 2026-11-23 调研报告
+
+完成本地初稿、章节编辑与单节重建、原文证据及 Word/Markdown 下载，25 项自动化测试通过。用户提供的 AgentArts 401 截图已复核，增加脱敏诊断，待账号侧恢复云端联调。本次交付后等待试用确认。[报告验收](docs/design/literature-report.md) · [401 记录](docs/platform-validation/managed-chat-401.md)
+
+
 ## 2026-11-22 文献对比矩阵
 
 已交付十字段矩阵、按 PDF 页保存的原文候选、人工修订及证据校验、字段筛选和 CSV 导出。21 项测试通过，两篇公开论文的 16 个候选引文均可在对应页文本定位。待用户确认矩阵；AgentArts 云端问答仍待账号联调。[本轮验收](docs/design/literature-matrix.md)

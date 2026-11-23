@@ -195,3 +195,17 @@ select { appearance: none; padding-right: 1.75rem; background: linear-gradient(4
 .matrix-table blockquote { margin: .3rem 0; color: var(--muted); }
 .matrix-edit { display: inline-block; text-decoration: underline; margin-inline-start: .4rem; }
 .matrix-edit-evidence label { max-width: 12rem; }
+
+.report-nav { display: flex; flex-wrap: wrap; gap: .35rem 1rem; padding-block: .4rem; }
+.report-nav a { text-decoration: underline; text-underline-offset: .2em; }
+.report-section { margin-top: 1.15rem; scroll-margin-top: 1rem; }
+.report-section .sheet-head { justify-content: space-between; flex-wrap: wrap; }
+.report-body { padding: 1.1rem 1.4rem; overflow-wrap: anywhere; }
+.report-copy { white-space: pre-wrap; max-width: 75ch; }
+.report-evidence { margin-top: 1rem; color: var(--muted); }
+.report-evidence .qa-results > li { padding-inline: 0; }
+.report-ref { margin: 1rem 1rem 1rem 2.7rem; padding: 0; overflow-wrap: anywhere; }
+.report-ref > li + li { margin-top: .45rem; }
+.report-list-item { padding: .75rem 1.4rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.report-rebuild { margin: 0 1.4rem 1.1rem; border-top: 1px solid var(--line); padding-top: .75rem; }
+.report-rebuild button { margin-top: .5rem; }

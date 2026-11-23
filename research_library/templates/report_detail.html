@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }}{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('reports.listing', topic_id=topic.id) }}">返回调研报告 · {{ topic.name }}</a>
+<header class="pagehead">
+  <div><h1>{{ report.title }}</h1><p class="description">初稿汇编文献摘录与矩阵内容。请核对后再使用研究结论。</p></div>
+  <div class="topic-actions">
+    <a class="button" href="{{ url_for('reports.export', report_id=report.id, format='md') }}">下载 Markdown</a>
+    <a class="button primary" href="{{ url_for('reports.export', report_id=report.id, format='docx') }}">下载 Word</a>
+  </div>
+</header>
+<nav class="report-nav" aria-label="报告章节">
+  {% for key, item in section_labels.items() %}<a href="#{{ key }}">{{ item[0] }}</a>{% endfor %}
+  <a href="#references">参考文献</a>
+</nav>
+{% for key, item in section_labels.items() %}
+{% set section = report.sections[key] %}
+<section class="sheet report-section" id="{{ key }}" aria-labelledby="title-{{ key }}">
+  <div class="sheet-head">
+    <h2 id="title-{{ key }}">{{ item[0] }}</h2>
+    <a class="button" href="{{ url_for('reports.section', report_id=report.id, key=key) }}" aria-label="编辑{{ item[0] }}">编辑本节</a>
+  </div>
+  <div class="report-body">
+    {% if section.body %}<p class="report-copy">{{ section.body }}</p>
+    {% else %}<p class="help">待补充。可核对原文后填写本节。</p>{% endif %}
+    {% if section.evidence %}
+    <details class="report-evidence">
+      <summary>本节原文证据（{{ section.evidence|length }}）</summary>
+      <ul class="qa-results">
+        {% for citation in section.evidence %}
+        {% set source = sources[citation.number] %}
+        <li class="qa-source">
+          {% if source.id in available %}
+          <a href="{{ url_for('document', document_id=source.id, page=citation.page) }}">[{{ citation.number }}] {{ source.title }} · PDF 第 {{ citation.page }} 页</a>
+          {% else %}
+          <p>[{{ citation.number }}] {{ source.title }} · PDF 第 {{ citation.page }} 页 · 原件已移除</p>
+          {% endif %}
+          <blockquote>{{ citation.quote }}</blockquote>
+        </li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+  </div>
+</section>
+{% endfor %}
+<section class="sheet report-section" id="references" aria-labelledby="ref-title">
+  <div class="sheet-head"><h2 id="ref-title">参考文献</h2></div>
+  <ol class="report-ref">
+    {% for source in report.sources %}
+    <li>{% if source.id in available %}
+      <a href="{{ url_for('document', document_id=source.id) }}">{{ reference_text(source) }}</a>
+      {% else %}{{ reference_text(source) }} <span class="help">· 原件已移除</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

@@ -29,6 +29,7 @@
   <div class="topic-actions">
     <a class="button" href="{{ url_for('qa', topic_id=topic.id) }}">文献问答</a>
     <a class="button" href="{{ url_for('matrix.table', topic_id=topic.id) }}">对比矩阵</a>
+    <a class="button" href="{{ url_for('reports.listing', topic_id=topic.id) }}">调研报告</a>
     <details class="upload" {% if not documents and not query and not category %}open{% endif %}>
       <summary class="button primary"><span aria-hidden="true">＋</span> 导入 PDF</summary>
       <form method="post" action="{{ url_for('upload', topic_id=topic.id) }}" enctype="multipart/form-data"

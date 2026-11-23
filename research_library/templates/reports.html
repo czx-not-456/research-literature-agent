@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}调研报告{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id) }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead"><h1>调研报告</h1></header>
+{% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+<section class="sheet" aria-labelledby="draft-report">
+  <div class="sheet-head"><div><h2 id="draft-report">新建报告</h2><p>从 {{ max_documents }} 篇以内的本课题文献汇编初稿。</p></div></div>
+  {% if documents %}
+  <form method="post" class="qa-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>报告标题<input name="title" value="{{ title }}" maxlength="{{ max_title }}" required></label>
+    <fieldset>
+      <legend>参考文献</legend>
+      <div class="qa-docs">
+        {% for item in documents %}
+        <label><input type="checkbox" name="document" value="{{ item.id }}"{% if item.id in selected %} checked{% endif %}>
+          <span>{{ item.title }}</span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <div class="qa-actions"><button class="button primary" type="submit">生成本地初稿</button></div>
+  </form>
+  {% else %}
+  <div class="empty"><p>请先到课题文献库导入 PDF。</p></div>
+  {% endif %}
+</section>
+{% if reports %}
+<section class="sheet report-section" aria-labelledby="saved-reports">
+  <div class="sheet-head"><h2 id="saved-reports">已保存的报告</h2></div>
+  <ul class="document-list">
+    {% for item in reports %}
+    <li class="report-list-item"><a href="{{ url_for('reports.detail', report_id=item.id) }}">{{ item.title }}</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

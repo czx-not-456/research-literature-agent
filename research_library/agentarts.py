@@ -115,6 +115,34 @@ def read_answer(stream, deadline):
     raise AgentArtsError("AgentArts 连接在回答完成前关闭。")
 
 
+def _http_diagnostics(error):
+    # Print only the public platform error code, trace ID and fixed classifications.
+    request_id = (error.headers or {}).get("X-Request-Id")
+    payload = {}
+    try:
+        data = json.loads(error.read(4096))
+        if isinstance(data, dict):
+            payload = data
+    except (ValueError, OSError, HTTPException, RecursionError):
+        pass
+    finally:
+        error.close()
+
+    code = payload.get("error_code")
+    request_id = request_id or payload.get("request_id")
+    details = []
+    if isinstance(code, str) and re.fullmatch(r"(?:APIGW?|AgentArts)\.[0-9]{4,12}", code):
+        details.append(f"平台错误码 {code}")
+    if isinstance(request_id, str) and re.fullmatch(r"[a-fA-F0-9-]{16,64}", request_id):
+        details.append(f"请求 ID {request_id}")
+    raw_message = payload.get("error_msg") or payload.get("message")
+    message = raw_message.lower() if isinstance(raw_message, str) else ""
+    if "signature expired" in message:
+        details.append("签名时间超出有效窗口，请同步 Windows 系统时钟")
+    elif "token expired" in message or "token expires" in message:
+        details.append("请刷新完整的临时凭据")
+    return "（" + "，".join(details) + "）" if details else ""
+
 class AgentArtsChat:
     def __init__(self, endpoint, agent, region, ak, sk, token=""):
         # Only allow the configured regional AgentArts service to receive IAM credentials.
@@ -154,16 +182,16 @@ class AgentArtsChat:
                 return read_answer(response, deadline)
         except HTTPError as error:
             status = error.code
-            error.close()
+            diagnostic = _http_diagnostics(error)
             if status in (401, 403):
-                message = "请核对本地 IAM 密钥权限和智能体的入站认证。"
+                message = "请核对运行时访问域名、IAM 密钥以及入站认证。"
             elif status == 404:
                 message = "请核对智能体名称、访问域名和部署状态。"
             elif status == 429:
                 message = "平台限流或配额不足，请稍后再试。"
             else:
                 message = "请查看 AgentArts 平台运行日志。"
-            raise AgentArtsError(f"AgentArts 请求失败（HTTP {status}）。{message}") from None
+            raise AgentArtsError(f"AgentArts 请求失败（HTTP {status}）。{message}{diagnostic}") from None
         except TimeoutError:
             raise AgentArtsError("等待 AgentArts 回答超时。") from None
         except (URLError, HTTPException, OSError):

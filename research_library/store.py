@@ -53,6 +53,23 @@ CREATE TABLE IF NOT EXISTS matrix_cells (
     FOREIGN KEY (document_id, page) REFERENCES pages(document_id, number) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS reports (
+    id TEXT PRIMARY KEY,
+    topic_id TEXT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    sources TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS reports_by_topic ON reports(topic_id, created_at DESC);
+CREATE TABLE IF NOT EXISTS report_sections (
+    report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
+    section TEXT NOT NULL,
+    body TEXT NOT NULL,
+    evidence TEXT NOT NULL,
+    PRIMARY KEY (report_id, section)
+);
+
 """
 TITLE_COLUMNS = "id, topic_id, filename, title, authors, abstract, keywords, year, doi, category, sources, page_count, text_page_count, created_at, updated_at"
 EDIT_COLUMNS = ("title", "authors", "abstract", "keywords", "year", "doi", "category")
@@ -194,6 +211,48 @@ class Library:
                 ON CONFLICT(document_id, field) DO UPDATE SET
                     text = excluded.text, source = excluded.source, page = excluded.page, quote = excluded.quote
             """, (document_id, field, text, page, quote))
+
+    def list_reports(self, topic_id):
+        with closing(self.connect()) as db:
+            return db.execute("""
+                SELECT id, title, updated_at FROM reports
+                WHERE topic_id = ? ORDER BY created_at DESC, rowid DESC
+            """, (topic_id,)).fetchall()
+
+    def add_report(self, topic_id, title, sources, drafts):
+        report_id = str(uuid4())
+        with closing(self.connect()) as db, db:
+            db.execute("INSERT INTO reports(id, topic_id, title, sources) VALUES (?, ?, ?, ?)",
+                       (report_id, topic_id, title, json.dumps(sources, ensure_ascii=False)))
+            db.executemany("INSERT INTO report_sections(report_id, section, body, evidence) VALUES (?, ?, ?, ?)", (
+                (report_id, key, draft.text, json.dumps(draft.evidence, ensure_ascii=False))
+                for key, draft in drafts.items()
+            ))
+        return report_id
+
+    def report(self, report_id):
+        with closing(self.connect()) as db:
+            db.execute("BEGIN")
+            row = db.execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
+            if row is None:
+                return None
+            report = dict(row)
+            report["sources"] = json.loads(row["sources"])
+            report["sections"] = {
+                item["section"]: {"body": item["body"], "evidence": json.loads(item["evidence"])}
+                for item in db.execute("SELECT * FROM report_sections WHERE report_id = ?", (report_id,))
+            }
+            return report
+
+    def update_report_section(self, report_id, section, text, evidence=None):
+        with closing(self.connect()) as db, db:
+            if evidence is None:
+                db.execute("UPDATE report_sections SET body = ? WHERE report_id = ? AND section = ?",
+                           (text, report_id, section))
+            else:
+                db.execute("UPDATE report_sections SET body = ?, evidence = ? WHERE report_id = ? AND section = ?",
+                           (text, json.dumps(evidence, ensure_ascii=False), report_id, section))
+            db.execute("UPDATE reports SET updated_at = CURRENT_TIMESTAMP WHERE id = ?", (report_id,))
 
     def document(self, document_id):
         with closing(self.connect()) as db:

@@ -18,6 +18,7 @@ from .grounding import MAX_DOCUMENTS, MAX_QUESTION, answer_prompt, decode_answer
 from .ingest import FIELD_LIMITS, MAX_PAGES, MAX_UPLOAD_BYTES, InvalidPDF, normalize_doi, parse_pdf
 from .matrix_routes import bp as matrix_blueprint
 from .preview import render_page_png
+from .report_routes import bp as report_blueprint
 from .store import Library
 
 MAX_BATCH_FILES = 10
@@ -52,6 +53,7 @@ def create_app(config=None):
     library = Library(app.config["LIBRARY_DB"])
     app.extensions["research_library"] = library
     app.register_blueprint(matrix_blueprint)
+    app.register_blueprint(report_blueprint)
 
     def csrf_token():
         if "csrf_token" not in session:

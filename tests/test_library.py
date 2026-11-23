@@ -7,6 +7,8 @@ from contextlib import closing
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import urlencode, urlsplit
+from xml.etree import ElementTree as ET
+from zipfile import ZipFile
 from unittest.mock import Mock, patch
 
 from pypdf import PdfReader, PdfWriter
@@ -380,6 +382,75 @@ class LiteratureLibraryTest(unittest.TestCase):
         self.client.post(f"{route}?{query}", data={"csrf_token": self.csrf()})
         library = self.app.extensions["research_library"]
         self.assertEqual(library.matrix_cells([own["id"], other["id"]]), {})
+
+    def report_request(self, ids, title="双语调研报告"):
+        return self.client.post(self.topic_path + "/reports", data={
+            "csrf_token": self.csrf(), "document": ids, "title": title,
+        })
+
+    def test_report_creation_uses_matrix_sources_and_links_physical_pages(self):
+        zh_path, zh = self.document_row(self.upload(sample_pdf("zh"), "research-zh.pdf"))
+        _, en = self.document_row(self.upload(sample_pdf("en"), "research-en.pdf"))
+        route = self.topic_path + "/reports"
+        self.assertIn(f'href="{route}"', self.client.get(self.topic_path).get_data(as_text=True))
+        quote = "第二页中的证据定位标记"
+        library = self.app.extensions["research_library"]
+        library.set_matrix_cell(zh["id"], "method", "可核对的方法条目", 2, quote)
+        report = self.report_request([zh["id"], en["id"]])
+        self.assertEqual(report.status_code, 302)
+        body = self.client.get(report.location).get_data(as_text=True)
+        self.assertIn("可核对的方法条目", body)
+        self.assertIn(f'{zh_path}?page=2', body)
+        self.assertIn(quote, body)
+        self.assertIn("参考文献", body)
+        self.assertIn("待补充", body)
+        self.assertIn("双语调研报告", self.client.get(route).get_data(as_text=True))
+        self.client.post(zh_path + "/delete", data={"csrf_token": self.csrf()})
+        snapshot = self.client.get(report.location).get_data(as_text=True)
+        self.assertIn("原件已移除", snapshot)
+        self.assertIn(quote, snapshot)
+        self.assertNotIn(f'{zh_path}?page=2', snapshot)
+
+    def test_report_section_rebuild_preserves_other_edits_and_exports(self):
+        _, paper = self.document_row(self.upload(sample_pdf("en"), "research.pdf"))
+        library = self.app.extensions["research_library"]
+        library.set_matrix_cell(paper["id"], "limitations", "Earlier limitation", None, "")
+        path = self.report_request([paper["id"]], "引文 & 方法").location
+        self.assertEqual(self.client.post(path + "/sections/background", data={
+            "csrf_token": self.csrf(), "body": "核验结果 <section> 保持可读。", "action": "save",
+        }).status_code, 302)
+        library.set_matrix_cell(paper["id"], "limitations", "Updated limitation", None, "")
+        response = self.client.post(path + "/sections/limitations", data={
+            "csrf_token": self.csrf(), "action": "rebuild",
+        })
+        self.assertEqual(response.location, path + "#limitations")
+        fresh = create_app(self.config).test_client()
+        md = fresh.get(path + "/export/md")
+        self.assertIn("attachment", md.headers["Content-Disposition"])
+        text = md.data.decode("utf-8")
+        self.assertIn("## 参考文献", text)
+        self.assertIn("&lt;section&gt;", text)
+        self.assertIn("Updated limitation", text)
+        self.assertNotIn("Earlier limitation", text)
+        docx = fresh.get(path + "/export/docx")
+        self.assertIn("filename=literature-report.docx", docx.headers["Content-Disposition"])
+        with ZipFile(io.BytesIO(docx.data)) as archive:
+            self.assertIsNone(archive.testzip())
+            doc = ET.fromstring(archive.read("word/document.xml"))
+            words = [node.text for node in doc.iter() if node.tag.endswith("}t")]
+            self.assertIn("引文 & 方法", words)
+            self.assertIn("核验结果 <section> 保持可读。", words)
+            self.assertIn("Updated limitation", words)
+            self.assertTrue(all(part in archive.namelist() for part in ("[Content_Types].xml", "word/styles.xml")))
+        self.assertEqual(fresh.get(path + "/export/pdf").status_code, 404)
+
+    def test_report_rejects_cross_topic_documents_and_requires_csrf(self):
+        _, own = self.document_row(self.upload(sample_pdf("en"), "own.pdf"))
+        other_topic = self.create_topic("独立课题")
+        _, other = self.document_row(self.upload(sample_pdf("zh"), "other.pdf", other_topic))
+        self.assertEqual(self.report_request([own["id"], other["id"]]).status_code, 400)
+        self.assertEqual(self.report_request([], "缺少文献").status_code, 400)
+        self.assertEqual(self.client.post(self.topic_path + "/reports", data={"title": "Blocked"}).status_code, 400)
 
     def qa_request(self, document_ids, question, action="find"):
         return self.client.post(self.topic_path + "/qa", data={

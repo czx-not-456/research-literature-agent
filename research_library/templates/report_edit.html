@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ section_title }}{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ destination }}">返回报告 · {{ report.title }}</a>
+<header class="pagehead"><h1>{{ section_title }}</h1></header>
+{% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+<section class="sheet" aria-label="编辑报告章节">
+  <form method="post" class="qa-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>章节正文<textarea rows="14" name="body" maxlength="{{ max_section }}">{{ text }}</textarea></label>
+    <p class="help">手动保存会保留此前找到的原文证据，请分别核对新增内容。</p>
+    <div class="qa-actions"><button type="submit" name="action" value="save" class="button primary">保存本节</button></div>
+  </form>
+  <details class="report-rebuild">
+    <summary>从文献和矩阵重建本节</summary>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <p class="help">重建会替换本节保存的内容和证据。</p>
+      <button type="submit" name="action" value="rebuild" class="button">确认重建</button>
+    </form>
+  </details>
+</section>
+{% endblock %}
