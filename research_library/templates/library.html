@@ -30,6 +30,7 @@
     <a class="button" href="{{ url_for('qa', topic_id=topic.id) }}">文献问答</a>
     <a class="button" href="{{ url_for('matrix.table', topic_id=topic.id) }}">对比矩阵</a>
     <a class="button" href="{{ url_for('reports.listing', topic_id=topic.id) }}">调研报告</a>
+    <a class="button" href="{{ url_for('catalog.search', topic_id=topic.id) }}">在线检索</a>
     <details class="upload" {% if not documents and not query and not category %}open{% endif %}>
       <summary class="button primary"><span aria-hidden="true">＋</span> 导入 PDF</summary>
       <form method="post" action="{{ url_for('upload', topic_id=topic.id) }}" enctype="multipart/form-data"
@@ -50,7 +51,7 @@
 </header>
 <section class="sheet" aria-labelledby="papers-title">
   <div class="sheet-head">
-    <div><h2 id="papers-title">文献</h2><p>{{ documents|length }} 篇{% if query or category %}符合筛选条件{% endif %}</p></div>
+    <div><h2 id="papers-title">本地 PDF</h2><p>{{ documents|length }} 篇{% if query or category %}符合筛选条件{% endif %}</p></div>
     <form class="filters" method="get" action="{{ url_for('topic', topic_id=topic.id) }}" aria-label="搜索和筛选文献">
       <label class="visually-hidden" for="q">关键词</label>
       <input type="search" name="q" id="q" maxlength="200" value="{{ query }}" placeholder="搜索标题、DOI 或原文">
@@ -92,5 +93,30 @@
   </div>
   {% endif %}
 </section>
+{% if online_sources %}
+<section class="sheet report-section" id="online-sources" aria-labelledby="online-sources-heading">
+  <div class="sheet-head">
+    <div><h2 id="online-sources-heading">在线文献记录</h2><p>{{ online_sources|length }} 条</p></div>
+    <a class="button" href="{{ url_for('catalog.search', topic_id=topic.id) }}">继续在线检索</a>
+  </div>
+  <ul class="document-list">
+    {% for entry in online_sources %}
+    <li class="paper">
+      <span class="file-mark" aria-hidden="true">索引</span>
+      <div class="paper-summary">
+        <h3><a href="{{ url_for('catalog.detail', topic_id=topic.id, source_id=entry.id) }}">{{ entry.title }}</a></h3>
+        <div class="paper-meta">
+          <span>{{ academic_providers[entry.provider] }}</span>
+          {% if entry.authors %}<span>{{ entry.authors }}</span>{% endif %}
+          {% if entry.year %}<span>{{ entry.year }}</span>{% endif %}
+          {% if entry.doi %}<span>DOI {{ entry.doi }}</span>{% endif %}
+        </div>
+      </div>
+      <a class="paper-action" href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">打开来源</a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% endif %}
 {% endblock %}

@@ -1,5 +1,10 @@
 # 项目状态
 
+## 2026-11-23 在线学术检索
+
+用户截图确认网页版 AgentArts 问答成功，显示核对通过的 PDF 第 2 页摘录及模型推断。在线检索与导入已交付，29 项回归和三组真实 API 的网页导入实测通过。平台自主工具编排待验收。[在线检索验收](docs/design/academic-search.md)
+
+
 ## 2026-11-23 调研报告
 
 完成本地初稿、章节编辑与单节重建、原文证据及 Word/Markdown 下载，25 项自动化测试通过。用户提供的 AgentArts 401 截图已复核，增加脱敏诊断，待账号侧恢复云端联调。本次交付后等待试用确认。[报告验收](docs/design/literature-report.md) · [401 记录](docs/platform-validation/managed-chat-401.md)

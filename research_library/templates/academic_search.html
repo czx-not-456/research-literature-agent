@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}在线文献检索{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id) }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead"><h1>在线文献检索</h1></header>
+<section class="sheet" aria-labelledby="academic-search-heading">
+  <div class="sheet-head"><h2 id="academic-search-heading">检索条件</h2></div>
+  <form method="get" class="qa-form">
+    <input type="hidden" name="search" value="1">
+    <div class="catalog-fields">
+      <label>关键词 <input type="search" name="q" maxlength="150" value="{{ values.q }}" placeholder="例如：检索增强生成"></label>
+      <label>作者 <input name="author" maxlength="100" value="{{ values.author }}"></label>
+      <label>年份 <input name="year" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="{{ values.year }}"></label>
+      <label>来源<select name="source">
+        {% for key, label in academic_providers.items() %}<option value="{{ key }}"{% if key == values.source %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select></label>
+      <label>研究领域<select name="field">
+        <option value="">全部领域</option>
+        {% for key, labels in fields.items() %}<option value="{{ key }}"{% if key == values.field %} selected{% endif %}>{{ labels[0] }}</option>{% endfor %}
+      </select></label>
+    </div>
+    <p class="help">Crossref 按出版年份检索，领域作为主题词。arXiv 按首次提交年份和学科分类检索。</p>
+    <div class="qa-actions"><button class="button primary" type="submit">检索</button></div>
+  </form>
+</section>
+{% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+{% if requested and not error %}
+<section class="sheet report-section" aria-labelledby="academic-results-heading">
+  <div class="sheet-head">
+    <div><h2 id="academic-results-heading">检索结果</h2><p>{{ academic_providers[values.source] }} · 第 {{ page }} 页 · 共 {{ total }} 条</p></div>
+  </div>
+  {% if results %}
+  <form method="post" action="{{ url_for('catalog.import_sources', topic_id=topic.id) }}" class="qa-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <ul class="catalog-results">
+      {% for record in results %}
+      <li>
+        {% if not record.imported %}
+        <input type="checkbox" id="source-{{ loop.index }}" name="record" value="{{ record.token }}"
+               aria-label="保存{{ record.title }}">
+        {% else %}<span class="help">已保存</span>{% endif %}
+        <div class="paper-summary">
+          <h3>{% if record.imported %}{{ record.title }}{% else %}<label for="source-{{ loop.index }}">{{ record.title }}</label>{% endif %}</h3>
+          <div class="paper-meta">
+            {% if record.authors %}<span>{{ record.authors }}</span>{% endif %}
+            {% if record.year %}<span>{{ record.year }}</span>{% endif %}
+            {% if record.venue %}<span>{{ record.venue }}</span>{% endif %}
+            {% if record.kind %}<span>{{ record.kind }}</span>{% endif %}
+          </div>
+          <div class="paper-meta">{% if record.doi %}<span>DOI {{ record.doi }}</span>{% endif %}
+            <a href="{{ record.url }}" target="_blank" rel="noopener noreferrer">来源页面</a>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if results|selectattr('imported', 'equalto', false)|list %}
+    <div class="qa-actions"><button class="button primary" type="submit">导入所选记录</button></div>
+    {% endif %}
+  </form>
+  {% else %}
+  <div class="empty"><p>本页没有可导入的结果。可调整检索条件。</p></div>
+  {% endif %}
+  {% if page > 1 or has_next %}
+  <nav aria-label="检索分页" class="qa-actions catalog-pager">
+    {% if page > 1 %}<a class="button" href="{{ url_for('catalog.search', topic_id=topic.id, search=1, page=page-1, **values) }}">上一页</a>{% endif %}
+    {% if has_next %}<a class="button" href="{{ url_for('catalog.search', topic_id=topic.id, search=1, page=page+1, **values) }}">下一页</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

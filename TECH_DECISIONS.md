@@ -1,5 +1,10 @@
 # 技术决策记录
 
+## 2026-11-23 在线学术检索
+
+采用公开 Crossref REST 与 arXiv Atom，导入保存元数据及版本标识，复用已有证据来源模型。限流、许可与完整 PDF 所需权限按来源区分。[在线检索验收](docs/design/academic-search.md)
+
+
 ## 2026-11-23 调研报告与云端诊断
 
 阶段内以已有文献、页文本和矩阵汇编本地初稿，持久化参考元数据和分章原文。下载支持 Markdown 和基于开放 XML 格式的 DOCX，复用 Python 标准库。本轮接入诊断只显示平台标识与固定提示，签名和入站认证方式保留现有 IAM V11。[报告验收](docs/design/literature-report.md)

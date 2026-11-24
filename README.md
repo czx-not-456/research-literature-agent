@@ -40,6 +40,10 @@ py -3 -m venv .venv-library
 
 若 AgentArts 问答返回 HTTP 401，参照运行时域名、入站认证和本机 IAM 配置的核对步骤。[401 联调记录](docs/platform-validation/managed-chat-401.md)
 
+## 在线学术检索
+
+在课题页面点「在线检索」，可查询 Crossref 或 arXiv。勾选结果保存到课题文献库，再按需要上传原 PDF。[检索使用及验收](docs/design/academic-search.md)
+
 运行集成测试：
 
 ```powershell

@@ -1,6 +1,7 @@
 import csv
 import io
 import json
+import re
 import sqlite3
 import unittest
 from contextlib import closing
@@ -382,6 +383,52 @@ class LiteratureLibraryTest(unittest.TestCase):
         self.client.post(f"{route}?{query}", data={"csrf_token": self.csrf()})
         library = self.app.extensions["research_library"]
         self.assertEqual(library.matrix_cells([own["id"], other["id"]]), {})
+
+    def test_online_import_is_bound_to_the_topic_and_links_same_doi(self):
+        from tests.test_academic import CROSSREF
+        from research_library.academic import AcademicSearch
+
+        path, _ = self.document_row(self.upload(sample_pdf("en"), "matching-source.pdf"))
+        other = self.create_topic("外部资料")
+        opener = Mock(return_value=io.BytesIO(json.dumps(CROSSREF).encode()))
+        self.app.extensions["academic_search"] = AcademicSearch(opener)
+        search = self.topic_path + "/search"
+        first = self.client.get(search)
+        self.assertEqual(first.status_code, 200)
+        opener.assert_not_called()
+        result = self.client.get(search + "?" + urlencode({"search": 1, "q": "可信科研"}))
+        self.assertEqual(result.status_code, 200)
+        body = result.get_data(as_text=True)
+        token = re.search(r'name="record" value="([^"]+)"', body).group(1)
+        self.assertIn("可信科研检索", body)
+        self.assertIn("下一页", body)
+        import_data = {"csrf_token": self.csrf(), "record": token}
+        self.client.post(other + "/sources", data=import_data)
+        data, stamp, signature = token.rsplit(".", 2)
+        changed = ("B" if signature[0] == "A" else "A") + signature[1:]
+        self.client.post(self.topic_path + "/sources", data={**import_data, "record": f"{data}.{stamp}.{changed}"})
+        library = self.app.extensions["research_library"]
+        topic_id = self.topic_path.rsplit("/", 1)[1]
+        self.assertEqual(library.list_online_sources(topic_id), [])
+        self.assertEqual(library.list_online_sources(other.rsplit("/", 1)[1]), [])
+        saved = self.client.post(self.topic_path + "/sources", data=import_data)
+        self.assertEqual(saved.location, self.topic_path + "#online-sources")
+        self.client.post(self.topic_path + "/sources", data=import_data)
+        records = create_app(self.config).extensions["research_library"].list_online_sources(topic_id, "可信科研")
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["provider"], "crossref")
+        self.assertEqual(records[0]["provider_id"], "10.12345/sample.en")
+        source_id = records[0]["id"]
+        detail = self.topic_path + "/sources/" + source_id
+        html = self.client.get(detail).get_data(as_text=True)
+        self.assertIn('https://doi.org/10.12345/sample.EN', html)
+        self.assertIn(f'href="{path}"', html)
+        self.assertIn(detail, self.client.get(self.topic_path + "?q=%E5%8F%AF%E4%BF%A1").get_data(as_text=True))
+        self.assertEqual(self.client.get(other + "/sources/" + source_id).status_code, 404)
+        self.assertEqual(self.client.post(detail + "/delete", data={"csrf_token": self.csrf()}).status_code, 302)
+        self.assertEqual(self.client.get(detail).status_code, 404)
+        self.assertEqual(self.client.get(path).status_code, 200)
+        opener.assert_called_once()
 
     def report_request(self, ids, title="双语调研报告"):
         return self.client.post(self.topic_path + "/reports", data={

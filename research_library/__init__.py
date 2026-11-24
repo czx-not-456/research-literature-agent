@@ -14,6 +14,7 @@ from flask import (
 )
 
 from .agentarts import AgentArtsError
+from .catalog_routes import init_app as init_catalog
 from .grounding import MAX_DOCUMENTS, MAX_QUESTION, answer_prompt, decode_answer, select_passages, verify_answer
 from .ingest import FIELD_LIMITS, MAX_PAGES, MAX_UPLOAD_BYTES, InvalidPDF, normalize_doi, parse_pdf
 from .matrix_routes import bp as matrix_blueprint
@@ -54,6 +55,7 @@ def create_app(config=None):
     app.extensions["research_library"] = library
     app.register_blueprint(matrix_blueprint)
     app.register_blueprint(report_blueprint)
+    init_catalog(app)
 
     def csrf_token():
         if "csrf_token" not in session:
@@ -132,6 +134,7 @@ def create_app(config=None):
         return render_template(
             "library.html", topic=current, topics=library.list_topics(), query=query, category=category,
             categories=categories, documents=library.list_documents(topic_id, query, category),
+            online_sources=library.list_online_sources(topic_id, query) if not category else [],
             max_mib=MAX_UPLOAD_BYTES // (1024 * 1024), max_pages=MAX_PAGES,
             max_batch_files=MAX_BATCH_FILES, max_batch_mib=MAX_BATCH_BYTES // (1024 * 1024),
             rename_open=request.args.get("rename") == "1",

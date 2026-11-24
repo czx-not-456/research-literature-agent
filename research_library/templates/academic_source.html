@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ entry.title }}{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id, _anchor='online-sources') }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead">
+  <div><p class="eyebrow">在线文献记录 · {{ academic_providers[entry.provider] }}</p><h1>{{ entry.title }}</h1></div>
+  <a class="button primary" href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">打开来源页面</a>
+</header>
+<section class="sheet" aria-labelledby="source-heading">
+  <div class="sheet-head"><h2 id="source-heading">书目信息</h2></div>
+  <dl class="catalog-metadata">
+    {% for label, value in [('作者',entry.authors),('年份',entry.year),('DOI',entry.doi),('期刊或学科',entry.venue),('类型',entry.kind),('来源标识',entry.provider_id),('导入时间（UTC）',entry.imported_at)] %}
+    {% if value %}<dt>{{ label }}</dt><dd>{{ value }}</dd>{% endif %}
+    {% endfor %}
+  </dl>
+  <div class="catalog-source-actions">
+    {% if local_pdf %}
+    <a class="button" href="{{ url_for('document', document_id=local_pdf.id) }}">打开同 DOI 的本地 PDF</a>
+    {% else %}
+    <p class="help">本条已保存书目信息。获取 PDF 后，可从课题文献库导入原件用于问答与引用核验。</p>
+    {% endif %}
+    <details class="delete">
+      <summary>移除在线记录</summary>
+      <form method="post" action="{{ url_for('catalog.delete', topic_id=topic.id, source_id=entry.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button danger" type="submit">确认移除</button>
+      </form>
+    </details>
+  </div>
+</section>
+{% endblock %}

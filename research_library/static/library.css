@@ -209,3 +209,18 @@ select { appearance: none; padding-right: 1.75rem; background: linear-gradient(4
 .report-list-item { padding: .75rem 1.4rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .report-rebuild { margin: 0 1.4rem 1.1rem; border-top: 1px solid var(--line); padding-top: .75rem; }
 .report-rebuild button { margin-top: .5rem; }
+
+.catalog-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .8rem; }
+.catalog-fields select { margin-top: .36rem; }
+.catalog-results { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
+.catalog-results > li { display: grid; grid-template-columns: 4rem minmax(0, 1fr); align-items: start;
+  gap: .65rem; padding: .75rem; border: 1px solid var(--line); border-radius: .45rem; }
+.catalog-results input { width: auto; justify-self: start; margin: .32rem; accent-color: var(--accent); }
+.catalog-results label { cursor: pointer; }
+.catalog-pager { padding: 0 1.4rem 1.2rem; }
+.catalog-metadata { display: grid; grid-template-columns: minmax(4rem, 8rem) minmax(0, 1fr);
+  margin: 0; padding: 1.25rem 1.4rem; gap: .4rem .65rem; overflow-wrap: anywhere; }
+.catalog-metadata dt { font-weight: 650; }
+.catalog-metadata dd { margin: 0; }
+.catalog-source-actions { padding: 0 1.4rem 1.25rem; }
+.catalog-source-actions .delete { margin: .8rem 0 0; }

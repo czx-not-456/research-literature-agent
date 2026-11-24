@@ -70,6 +70,22 @@ CREATE TABLE IF NOT EXISTS report_sections (
     PRIMARY KEY (report_id, section)
 );
 
+CREATE TABLE IF NOT EXISTS online_sources (
+    id TEXT PRIMARY KEY,
+    topic_id TEXT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    authors TEXT NOT NULL,
+    year TEXT NOT NULL,
+    doi TEXT NOT NULL,
+    venue TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    url TEXT NOT NULL,
+    imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (topic_id, provider, provider_id)
+);
+
 """
 TITLE_COLUMNS = "id, topic_id, filename, title, authors, abstract, keywords, year, doi, category, sources, page_count, text_page_count, created_at, updated_at"
 EDIT_COLUMNS = ("title", "authors", "abstract", "keywords", "year", "doi", "category")
@@ -97,7 +113,7 @@ class Library:
     def list_topics(self):
         with closing(self.connect()) as db:
             return db.execute("""
-                SELECT topics.*, COUNT(documents.id) AS document_count
+                SELECT topics.*, COUNT(documents.id) + (SELECT COUNT(*) FROM online_sources s WHERE s.topic_id = topics.id) AS document_count
                 FROM topics LEFT JOIN documents ON documents.topic_id = topics.id
                 GROUP BY topics.id
                 ORDER BY topics.created_at DESC, topics.name
@@ -253,6 +269,44 @@ class Library:
                 db.execute("UPDATE report_sections SET body = ?, evidence = ? WHERE report_id = ? AND section = ?",
                            (text, json.dumps(evidence, ensure_ascii=False), report_id, section))
             db.execute("UPDATE reports SET updated_at = CURRENT_TIMESTAMP WHERE id = ?", (report_id,))
+
+    def add_online_sources(self, topic_id, records):
+        with closing(self.connect()) as db, db:
+            result = db.executemany("""
+                INSERT INTO online_sources(id, topic_id, provider, provider_id, title, authors, year, doi, venue, kind, url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(topic_id, provider, provider_id) DO NOTHING
+            """, ((str(uuid4()), topic_id, *(record[key] for key in
+                  ("provider", "provider_id", "title", "authors", "year", "doi", "venue", "kind", "url")))
+                  for record in records))
+            return result.rowcount
+
+    def list_online_sources(self, topic_id, query=""):
+        pattern = _like_pattern(query)
+        with closing(self.connect()) as db:
+            return db.execute("""
+                SELECT * FROM online_sources WHERE topic_id = ? AND
+                  (title LIKE ? ESCAPE '\\' OR authors LIKE ? ESCAPE '\\' OR doi LIKE ? ESCAPE '\\'
+                   OR year LIKE ? ESCAPE '\\' OR provider_id LIKE ? ESCAPE '\\' OR venue LIKE ? ESCAPE '\\')
+                ORDER BY imported_at DESC, rowid DESC
+            """, (topic_id, *(pattern for _ in range(6)))).fetchall()
+
+    def online_source(self, topic_id, source_id):
+        with closing(self.connect()) as db:
+            return db.execute("SELECT * FROM online_sources WHERE topic_id = ? AND id = ?",
+                              (topic_id, source_id)).fetchone()
+
+    def delete_online_source(self, topic_id, source_id):
+        with closing(self.connect()) as db, db:
+            return bool(db.execute("DELETE FROM online_sources WHERE topic_id = ? AND id = ?",
+                                   (topic_id, source_id)).rowcount)
+
+    def document_matching_doi(self, topic_id, doi):
+        with closing(self.connect()) as db:
+            return db.execute("""
+                SELECT id FROM documents WHERE topic_id = ? AND doi = ? COLLATE NOCASE
+                ORDER BY created_at DESC, rowid DESC LIMIT 1
+            """, (topic_id, doi)).fetchone()
 
     def document(self, document_id):
         with closing(self.connect()) as db:

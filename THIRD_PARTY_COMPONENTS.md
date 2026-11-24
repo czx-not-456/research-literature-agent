@@ -1,5 +1,10 @@
 # 第三方组件与许可登记
 
+## 2026-11-23 在线学术检索
+
+本阶段接入 Crossref 公开 REST 与 arXiv 公开 Atom，使用 Python 标准库和既有 Flask 依赖。费用、限流及许可记录见下。[在线检索验收](docs/design/academic-search.md)
+
+
 ## 2026-11-22 问答接入记录
 
 本轮沿用已登记的文献库依赖。新增客户端使用 Python 标准库，根据华为云官方 InvokeChat、IAM V11 资料及既有探针实现签名与流读取。AgentArts 为外部云服务。本轮未引入 SDK 或第三方源码、未安装新依赖。正式使用前仍需核对云端用量、账单和数据处理条款。[来源与集成范围](docs/design/literature-qa.md)
