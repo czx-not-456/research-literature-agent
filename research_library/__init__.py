@@ -19,6 +19,7 @@ from .grounding import MAX_DOCUMENTS, MAX_QUESTION, answer_prompt, decode_answer
 from .ingest import FIELD_LIMITS, MAX_PAGES, MAX_UPLOAD_BYTES, InvalidPDF, normalize_doi, parse_pdf
 from .matrix_routes import bp as matrix_blueprint
 from .preview import render_page_png
+from .refresh_routes import bp as refresh_blueprint
 from .report_routes import bp as report_blueprint
 from .store import Library
 
@@ -55,6 +56,7 @@ def create_app(config=None):
     app.extensions["research_library"] = library
     app.register_blueprint(matrix_blueprint)
     app.register_blueprint(report_blueprint)
+    app.register_blueprint(refresh_blueprint)
     init_catalog(app)
 
     def csrf_token():

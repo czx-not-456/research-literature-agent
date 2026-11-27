@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}批量更新文献{% endblock %}
+{% block content %}
+<a class="backlink" href="{{ url_for('topic', topic_id=topic.id) }}">返回课题文献库 · {{ topic.name }}</a>
+<header class="pagehead"><h1>批量更新文献</h1></header>
+{% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+<section class="sheet" aria-labelledby="refresh-scope">
+  <div class="sheet-head">
+    <div><h2 id="refresh-scope">选择本地 PDF</h2><p>每批最多 {{ limit }} 篇。先预览空字段补齐和自动候选调整，再确认应用。</p></div>
+  </div>
+  {% if documents %}
+  <form method="post" class="qa-form" action="{{ url_for('refresh.review', topic_id=topic.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <fieldset>
+      <legend>文献</legend>
+      <div class="qa-docs">
+        {% for item in documents %}
+        <label><input type="checkbox" name="document" value="{{ item.id }}"{% if item.id in ids %} checked{% endif %}>
+          <span>{{ item.title }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <div class="qa-actions"><button class="button" name="action" value="preview">预览更新</button></div>
+  </form>
+  {% else %}
+  <div class="empty"><p>此课题暂无本地 PDF。</p></div>
+  {% endif %}
+</section>
+{% if plan %}
+<section class="sheet report-section" aria-labelledby="refresh-results">
+  <div class="sheet-head">
+    <div><h2 id="refresh-results">更新预览</h2><p>手工填写和手工清空的字段受到保护。</p></div>
+    {% if review_token %}
+    <form method="post" action="{{ url_for('refresh.review', topic_id=topic.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="review" value="{{ review_token }}">
+      <button class="button primary" name="action" value="apply">应用预览中的更新</button>
+    </form>
+    {% endif %}
+  </div>
+  <ul class="qa-results">
+    {% for entry in plan %}
+    <li>
+      <h3><a href="{{ url_for('document', document_id=entry.id) }}">{{ entry.title }}</a></h3>
+      {% if entry.error %}<p class="help">{{ entry.error }}</p>{% endif %}
+      {% if entry.fields %}
+      <dl class="catalog-metadata">
+        {% for field, change in entry.fields.items() %}
+        <dt>{{ labels[field] }}</dt>
+        <dd class="matrix-cell">{{ change.value }} <small class="help">{{ field_sources[change.source] }}</small></dd>
+        {% endfor %}
+      </dl>
+      {% endif %}
+      {% for field, change in entry.matrix.items() %}
+      <details>
+        <summary>{{ matrix_labels[field] }} · {{ '新增候选' if not change.before else '替换候选' if change.after else '移除旧候选' }}</summary>
+        {% for label, cell in [('原候选', change.before), ('新候选', change.after)] if cell %}
+        <div class="qa-source">
+          {% if cell.page %}<a href="{{ url_for('document', document_id=entry.id, page=cell.page) }}">{{ label }} · PDF 第 {{ cell.page }} 页</a>
+          {% else %}<p>{{ label }}</p>{% endif %}
+          <blockquote>{{ cell.text }}</blockquote>
+        </div>
+        {% endfor %}
+      </details>
+      {% endfor %}
+      {% if not entry.fields and not entry.matrix and not entry.error %}<p class="help">暂无可应用的更新。</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

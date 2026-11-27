@@ -1,5 +1,13 @@
 # 自主工作与原创边界
 
+## 存量文献更新流程
+
+项目新增课题内的批量差异预览、基于来源的手工字段保护，以及确认后核对原文与变更并事务应用的流程。PDF 解析、签名和持久化复用项目现有 pypdf、itsdangerous 和 SQLite。[验收](docs/design/library-refresh.md)
+
+## PDF 元数据与矩阵候选优化
+
+项目新增同题名出版与署名核对规则、带物理页证据的数据集与指标候选排序，以及四篇论文的人工标注对照脚本。PDF 文本提取由 pypdf 提供，文献及其书目由各出版方提供。[测试记录](docs/system-testing/quality-results.md)
+
 ## 2026-11-24 AgentArts 多步文献调研
 
 新增课题检索与书目核验的 Skill 流程说明、只读工具脚本和结果追溯校验；AgentArts 管理沙箱与模型调用，Crossref 提供书目数据。

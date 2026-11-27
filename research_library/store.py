@@ -89,11 +89,16 @@ CREATE TABLE IF NOT EXISTS online_sources (
 """
 TITLE_COLUMNS = "id, topic_id, filename, title, authors, abstract, keywords, year, doi, category, sources, page_count, text_page_count, created_at, updated_at"
 EDIT_COLUMNS = ("title", "authors", "abstract", "keywords", "year", "doi", "category")
+BACKFILL_COLUMNS = ("authors", "year", "doi", "keywords", "abstract")
 SEARCH_COLUMNS = ("title", "authors", "abstract", "keywords", "year", "doi", "category", "filename")
 
 
 def _like_pattern(query):
     return "%" + query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+
+
+class StaleLibraryRefresh(ValueError):
+    """A reviewed record was changed or deleted before the update."""
 
 
 class Library:
@@ -193,7 +198,7 @@ class Library:
         placeholders = ", ".join("?" for _ in document_ids)
         with closing(self.connect()) as db:
             yield from db.execute(f"""
-                SELECT d.id AS document_id, d.title, p.number, p.text
+                SELECT d.id AS document_id, d.title, p.number, p.text, p.status
                 FROM pages p JOIN documents d ON p.document_id = d.id
                 WHERE d.topic_id = ? AND d.id IN ({placeholders}) AND p.text <> ''
                 ORDER BY d.id, p.number
@@ -227,6 +232,52 @@ class Library:
                 ON CONFLICT(document_id, field) DO UPDATE SET
                     text = excluded.text, source = excluded.source, page = excluded.page, quote = excluded.quote
             """, (document_id, field, text, page, quote))
+
+    def apply_reviewed_refresh(self, topic_id, plan):
+        with closing(self.connect()) as db, db:
+            db.execute("BEGIN IMMEDIATE")
+            for entry in plan:
+                doc_id = entry["id"]
+                row = db.execute(
+                    f"SELECT sources, {', '.join(BACKFILL_COLUMNS)} FROM documents WHERE id = ? AND topic_id = ?",
+                    (doc_id, topic_id),
+                ).fetchone()
+                if row is None:
+                    raise StaleLibraryRefresh()
+                sources = json.loads(row["sources"])
+                fields = entry["fields"]
+                for field, change in fields.items():
+                    if row[field] or sources.get(field) == "manual":
+                        raise StaleLibraryRefresh()
+                    sources[field] = change["source"]
+                if fields:
+                    columns = ", ".join(f"{field} = ?" for field in fields)
+                    db.execute(f"UPDATE documents SET {columns}, sources = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                               (*(change["value"] for change in fields.values()),
+                                json.dumps(sources, ensure_ascii=False), doc_id))
+                for field, change in entry["matrix"].items():
+                    current = db.execute(
+                        "SELECT text, source, page, quote FROM matrix_cells WHERE document_id = ? AND field = ?",
+                        (doc_id, field),
+                    ).fetchone()
+                    before = dict(current) if current is not None else None
+                    if before != change["before"] or (before and before["source"] != "excerpt"):
+                        raise StaleLibraryRefresh()
+                    after = change["after"]
+                    if after is None:
+                        db.execute("DELETE FROM matrix_cells WHERE document_id = ? AND field = ?", (doc_id, field))
+                    else:
+                        evidence = db.execute(
+                            "SELECT text FROM pages WHERE document_id = ? AND number = ?", (doc_id, after["page"])
+                        ).fetchone()
+                        if evidence is None or after["quote"] not in evidence["text"]:
+                            raise StaleLibraryRefresh()
+                        db.execute("""
+                            INSERT INTO matrix_cells(document_id, field, text, source, page, quote)
+                            VALUES (?, ?, ?, 'excerpt', ?, ?)
+                            ON CONFLICT(document_id, field) DO UPDATE SET
+                                text = excluded.text, page = excluded.page, quote = excluded.quote
+                        """, (doc_id, field, after["text"], after["page"], after["quote"]))
 
     def list_reports(self, topic_id):
         with closing(self.connect()) as db:

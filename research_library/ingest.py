@@ -3,6 +3,7 @@
 import io
 import re
 from dataclasses import dataclass
+from itertools import islice
 from pathlib import PurePath
 
 from pypdf import PdfReader
@@ -14,8 +15,11 @@ MAX_PAGE_CHARACTERS = 100_000
 FIELD_LIMITS = {"title": 400, "authors": 1000, "abstract": 8_000, "keywords": 800,
                 "year": 4, "doi": 300, "category": 120}
 DOI_PATTERN = re.compile(r"10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.IGNORECASE)
-DOI_LABEL = re.compile(r"(?:\bDOI\s*[:：]?\s*(?:https?://(?:dx\.)?doi\.org/)?|https?://(?:dx\.)?doi\.org/)"
-                       r"(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.IGNORECASE)
+DOI_LABEL = re.compile(
+    r"^[ \t]*(?:DOI[ \t]*[:：]?[ \t]*(?:https?://(?:dx\.)?doi\.org/)?|"
+    r"(?:(?:在线阅读(?:[ \t]+View online)?|View online)[ \t]*[:：][ \t]*)?https?://(?:dx\.)?doi\.org/)"
+    r"(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.IGNORECASE | re.MULTILINE,
+)
 ABSTRACT_HEADING = re.compile(r"^\s*(?:abstract\b|摘\s*要)\s*[:：.—–-]?\s*(.*)$", re.IGNORECASE)
 SECTION_HEADING = re.compile(
     r"^\s*(?:(?:keywords?|index terms)\b|关\s*键\s*[词字]|引言|绪论|正\s*文|"
@@ -31,6 +35,26 @@ PUBLICATION_YEAR = re.compile(
     r"发表(?:日期|时间|年)?|出版(?:日期|时间|年)?|发布日期)"
     r"\s*[:：]?\s*[^\r\n]{0,50}?\b((?:18|19|20)\d{2})(?=\D|$)",
     re.IGNORECASE | re.MULTILINE,
+)
+_JOURNAL_IMPRINT = re.compile(
+    r"\[J\][.。]?[ \t]*[^\r\n,，]{1,110}[,，][ \t]*((?:18|19|20)\d{2})[,，][ \t]*\d+\s*\(",
+    re.IGNORECASE,
+)
+_CONFERENCE_PAGES = re.compile(r"\bpages[ \t]+\d+\s*[-–—]\s*\d+", re.IGNORECASE)
+_CONFERENCE_MONTH = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|" \
+                    r"Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
+_CONFERENCE_DATE = re.compile(
+    rf"\b{_CONFERENCE_MONTH}\.?[ \t]+(?:\d{{1,2}}(?:[ \t]*[-–—][ \t]*(?:{_CONFERENCE_MONTH}\.?[ \t]+)?"
+    r"\d{1,2})?,?[ \t]+)?((?:18|19|20)\d{2})(?!\d)", re.IGNORECASE,
+)
+_CHINESE_NAME = r"[\u3400-\u9fff]{2,4}"
+_AFFILIATION_NUMBERS = r"(?:[ \t]*\d{1,2}(?:[ \t]*,[ \t]*\d{1,2})*)?"
+_CHINESE_BYLINE = re.compile(
+    rf"{_CHINESE_NAME}{_AFFILIATION_NUMBERS}(?:\s*[,，、;；]\s*{_CHINESE_NAME}{_AFFILIATION_NUMBERS})+"
+)
+_FRONT_MATTER_END = re.compile(
+    r"^[ \t]*(?:(?:\d+(?:\.\d+)*\.?[ \t]+)?(?:introduction|references|bibliography)\b|"
+    r"(?:[一1][、. \t]+)?(?:引言|绪论|参考文献)|您可能感兴趣|推荐阅读|related articles\b)", re.IGNORECASE,
 )
 NOISE_TITLE = re.compile(r"^(?:abstract\b|摘\s*要|doi\b|https?://|issn\b|isbn\b|arxiv\b|"
                          r"authors?\s*[:：]|作者\s*[:：]|keywords?\b|关键词|"
@@ -166,12 +190,60 @@ def _first_page_text(page, fragments):
     return page.extract_text(visitor_text=record)
 
 
+def _front_matter(text):
+    lines = []
+    for line in text.splitlines()[:36]:
+        if ABSTRACT_HEADING.match(line) or _FRONT_MATTER_END.match(line):
+            break
+        if line.strip():
+            lines.append(line.strip())
+    return lines
+
+
+def _title_key(line):
+    return re.sub(r"\s+", "", line).casefold()
+
+
+def _chinese_title_byline(headers, title):
+    title_key = _title_key(title)
+    if not re.search(r"[\u3400-\u9fff]", title_key):
+        return ""
+    for header in headers:
+        for index, line in enumerate(header[:-1]):
+            if _title_key(line) != title_key:
+                continue
+            names = header[index + 1]
+            following = header[index + 2:index + 3]
+            if not following or not following[0].startswith(("引用本文", "（", "(")):
+                continue
+            if _CHINESE_BYLINE.fullmatch(names):
+                return ", ".join(re.findall(_CHINESE_NAME, names))
+    return ""
+
+
+def _imprint_year(headers, title):
+    title_key = _title_key(title)
+    for header in headers:
+        for line in header:
+            imprint = _JOURNAL_IMPRINT.search(line)
+            if imprint and title_key and _title_key(line[:imprint.start()]).endswith(title_key):
+                return imprint.group(1)
+        for index, line in enumerate(header[:6]):
+            if line.casefold().startswith("proceedings of "):
+                imprint = "\n".join(header[index:index + 4])
+                if _CONFERENCE_PAGES.search(imprint):
+                    year = _match(_CONFERENCE_DATE, imprint)
+                    if year:
+                        return year
+    return ""
+
+
 def _extract_metadata(metadata, first_pages, filename, prominent_title):
     first = first_pages[0].text[:14_000]
     opening = "\n".join(page.text[:14_000] for page in first_pages[:2])
     first_lines = first.splitlines()
-    visible_doi = _match(DOI_LABEL, "\n".join(first_lines[:28]))
-    embedded_doi = normalize_doi(_field(metadata, "/DOI"))
+    headers = [_front_matter(page.text[:14_000]) for page in first_pages[:2]]
+    embedded_doi = normalize_doi(_field(metadata, "/DOI")) or normalize_doi(_field(metadata, "/doi"))
     fields = {}
     sources = {}
 
@@ -187,17 +259,39 @@ def _extract_metadata(metadata, first_pages, filename, prominent_title):
     filename_title = PurePath(filename).stem or "未命名文献"
     field("title", (title_property, "pdf_metadata"), (prominent_title or _title(first_lines), "opening_text"),
           (filename_title, "filename"))
-    field("authors", (_field(metadata, "/Author"), "pdf_metadata"), (_match(BYLINE, first), "opening_text"))
+    title = fields["title"] if sources["title"] != "filename" else ""
+    headers = headers[:1] + [
+        header for header in headers[1:] if title and any(_title_key(line) == _title_key(title) for line in header)
+    ]
+    bibliographic_text = "\n".join(line for header in headers for line in header)
+    visible_dois = {}
+    for match in DOI_LABEL.finditer(bibliographic_text):
+        doi = normalize_doi(match.group(1))
+        if doi:
+            visible_dois.setdefault(doi.casefold(), doi)
+    visible_doi = next(iter(visible_dois.values())) if len(visible_dois) == 1 else ""
+
+    field("authors", (_field(metadata, "/Author"), "pdf_metadata"),
+          (_match(BYLINE, bibliographic_text) or _chinese_title_byline(headers, title), "opening_text"))
     field("abstract", (_abstract(opening.splitlines()), "opening_text"))
     field("keywords", (_match(KEYWORDS, opening), "opening_text"),
           (_field(metadata, "/Keywords"), "pdf_metadata"))
-    field("year", (_match(PUBLICATION_YEAR, opening), "opening_text"))
-    field("doi", (embedded_doi, "pdf_metadata"), (normalize_doi(visible_doi), "opening_text"))
+    field("year", (_imprint_year(headers, title) or _match(PUBLICATION_YEAR, bibliographic_text), "opening_text"))
+    field("doi", (embedded_doi, "pdf_metadata"), (visible_doi, "opening_text"))
     fields["category"] = ""
     return fields, sources
 
 
 def parse_pdf(raw, filename):
+    return _parse_pdf(raw, filename, MAX_PAGES)
+
+
+def extract_pdf_metadata(raw, filename):
+    extracted = _parse_pdf(raw, filename, 2)
+    return extracted.fields, extracted.sources
+
+
+def _parse_pdf(raw, filename, extract_limit):
     if not raw or b"%PDF-" not in raw[:1024]:
         raise InvalidPDF("无法识别 PDF 文件。请重新选择原始 PDF。")
     try:
@@ -209,7 +303,7 @@ def parse_pdf(raw, filename):
             raise InvalidPDF(f"目前支持 1 至 {MAX_PAGES} 页的 PDF。")
         pages = []
         prominent_title = ""
-        for number, page in enumerate(reader.pages):
+        for number, page in enumerate(islice(reader.pages, extract_limit)):
             try:
                 if number == 0:
                     fragments = []
