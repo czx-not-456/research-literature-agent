@@ -1,5 +1,12 @@
 # 第三方组件与许可登记
 
+## 2026-11-24 AgentArts 多步文献调研
+
+新增平台 Skill 依赖现有 AgentArts 内置沙箱工具、Python 标准库和既有 Crossref 公共接口。未嵌入第三方代码或模型密钥。
+
+[工作流核验](docs/platform-validation/managed-research-workflow.md)
+
+
 ## 2026-11-23 在线学术检索
 
 本阶段接入 Crossref 公开 REST 与 arXiv 公开 Atom，使用 Python 标准库和既有 Flask 依赖。费用、限流及许可记录见下。[在线检索验收](docs/design/academic-search.md)

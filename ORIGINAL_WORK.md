@@ -1,5 +1,12 @@
 # 自主工作与原创边界
 
+## 2026-11-24 AgentArts 多步文献调研
+
+新增课题检索与书目核验的 Skill 流程说明、只读工具脚本和结果追溯校验；AgentArts 管理沙箱与模型调用，Crossref 提供书目数据。
+
+[工作流核验](docs/platform-validation/managed-research-workflow.md)
+
+
 ## 2026-11-23 在线学术检索
 
 项目实现双来源参数映射、限流、来源记录持久化与同 DOI 原件关联。检索数据来自 Crossref 和 arXiv。[在线检索验收](docs/design/academic-search.md)

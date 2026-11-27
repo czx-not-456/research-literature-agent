@@ -1,5 +1,18 @@
 # 项目状态
 
+## 2026-11-27 独立系统测试
+
+用户确认暂缓 AgentArts 云端工具验收并开展独立系统测试。已跑通真实双语论文解析、证据回跳、报告编辑和 Word/Markdown 导出，修复短语排序与 Word 排版，47 项回归通过。元数据漏项、arXiv 限流及云端验收仍有缺口。已交付本轮结果，等待确认下一步。[系统测试记录](docs/system-testing/acceptance-results.md)
+
+## 2026-11-24 AgentArts 多步文献调研
+
+在线检索获用户确认。进入 AgentArts 自主科研任务验收。已准备可导入 Skill 与 InvokeChat 轨迹核验探针，32 项回归及本机真实 Crossref 检索、两条 DOI 核验通过。待已登录账号挂载并运行一次云端任务。
+
+用户已确认当前运行版本关联 literature-research 并启用 Bash。最后一次实时检查有 skill_tool 配对结果，未发起 Bash，智能体报告 skill_load_failed。具体原因待平台证据核实。云端自主学术工具验收标记为阻塞，本轮排查结束。用户已确认暂缓该项云端验收并推进独立系统测试。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+[工作流核验](docs/platform-validation/managed-research-workflow.md)
+
+
 ## 2026-11-23 在线学术检索
 
 用户截图确认网页版 AgentArts 问答成功，显示核对通过的 PDF 第 2 页摘录及模型推断。在线检索与导入已交付，29 项回归和三组真实 API 的网页导入实测通过。平台自主工具编排待验收。[在线检索验收](docs/design/academic-search.md)

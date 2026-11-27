@@ -58,14 +58,19 @@ def _document(report):
     root = ET.Element(f"{{{W}}}document")
     body = _w(root, "body")
     for style, text in _paragraphs(report):
-        for line in _xml_text(text).splitlines():
-            if not line:
+        lines = "\n".join(_xml_text(text).splitlines())
+        for block in re.split(r"\n[ \t]*\n+", lines):
+            if not block.strip():
                 continue
             paragraph = _w(body, "p")
             _w(_w(paragraph, "pPr"), "pStyle", val=style)
-            span = _w(_w(paragraph, "r"), "t")
-            span.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
-            span.text = line
+            run = _w(paragraph, "r")
+            for index, line in enumerate(block.splitlines()):
+                if index:
+                    _w(run, "br")
+                span = _w(run, "t")
+                span.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+                span.text = line
     page = _w(body, "sectPr")
     _w(page, "pgSz", w="12240", h="15840")
     _w(page, "pgMar", top="1370", bottom="1370", left="1370", right="1370", header="720", footer="720", gutter="0")

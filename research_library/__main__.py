@@ -11,6 +11,23 @@ from .agentarts import AgentArtsChat
 DEFAULT_ENDPOINT = "https://defaultgw-mjrwiobqhe.cn-southwest-2.huaweicloud-agentarts.com"
 
 
+def read_iam():
+    ak = os.environ.get("HUAWEICLOUD_SDK_AK", "").strip()
+    sk = os.environ.get("HUAWEICLOUD_SDK_SK", "").strip()
+    token = os.environ.get("HUAWEICLOUD_SDK_SECURITY_TOKEN", "").strip()
+    if not (ak and sk):
+        if ak or sk or token:
+            raise ValueError("请同时设置 AK 和 SK，或清除相关环境变量后使用隐藏输入。")
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", getpass.GetPassWarning)
+                ak = getpass.getpass("Huawei Cloud AK (hidden): ").strip()
+                sk = getpass.getpass("Huawei Cloud SK (hidden): ").strip()
+        except (EOFError, getpass.GetPassWarning):
+            raise ValueError("无法隐藏输入。请在本机交互式 PowerShell 中运行。") from None
+    return ak, sk, token
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run the research library on 127.0.0.1.")
     parser.add_argument("--agentarts", action="store_true", help="Enable AgentArts QA using Huawei Cloud IAM.")
@@ -21,20 +38,8 @@ def main():
     args = parser.parse_args()
     config = {}
     if args.agentarts:
-        ak = os.environ.get("HUAWEICLOUD_SDK_AK", "").strip()
-        sk = os.environ.get("HUAWEICLOUD_SDK_SK", "").strip()
-        token = os.environ.get("HUAWEICLOUD_SDK_SECURITY_TOKEN", "").strip()
         try:
-            if not (ak and sk):
-                if ak or sk or token:
-                    raise ValueError("请同时设置 AK 和 SK，或清除相关环境变量后使用隐藏输入。")
-                with warnings.catch_warnings():
-                    warnings.simplefilter("error", getpass.GetPassWarning)
-                    ak = getpass.getpass("Huawei Cloud AK (hidden): ").strip()
-                    sk = getpass.getpass("Huawei Cloud SK (hidden): ").strip()
-            config["AGENTARTS_CLIENT"] = AgentArtsChat(args.endpoint, args.agent, args.region, ak, sk, token)
-        except (EOFError, getpass.GetPassWarning):
-            parser.error("无法隐藏输入。请在本机交互式 PowerShell 中运行。")
+            config["AGENTARTS_CLIENT"] = AgentArtsChat(args.endpoint, args.agent, args.region, *read_iam())
         except ValueError as error:
             parser.error(str(error))
     create_app(config).run(host="127.0.0.1", port=args.port, debug=False, use_reloader=False)

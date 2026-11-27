@@ -8,7 +8,7 @@ from email.message import Message
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 from research_library.agentarts import AgentArtsChat, AgentArtsError, read_answer, signed_headers
 
@@ -69,8 +69,38 @@ class AgentArtsTransportTest(unittest.TestCase):
         for terminal in ("chat.error", "chat.ask_user_question", "chat.interrupt_result", "chat.invocation_paused", ""):
             with self.subTest(terminal=terminal), self.assertRaises(AgentArtsError):
                 read_answer(io.BytesIO(prefix + (frame(terminal, {}) if terminal else b"")), time.monotonic() + 1)
-        with self.assertRaisesRegex(AgentArtsError, "超时"):
+        with self.assertRaises(AgentArtsError) as caught:
             read_answer(io.BytesIO(prefix), time.monotonic() - 1)
+        self.assertEqual(caught.exception.timeout_phase, "response_window_exceeded")
+
+    def test_timeout_before_response_headers_reports_phase_and_configured_wait(self):
+        for error in (TimeoutError("private error"), URLError(TimeoutError("private error"))):
+            with self.subTest(error_type=type(error)):
+                self.client._opener.open.side_effect = error
+                with self.assertRaises(AgentArtsError) as caught:
+                    self.client.ask("test", socket_timeout=75)
+                self.assertEqual(self.client._opener.open.call_args.kwargs["timeout"], 75)
+                self.assertEqual(caught.exception.timeout_phase, "waiting_for_response_headers")
+                self.assertNotIn("private error", str(caught.exception))
+
+    def test_stream_timeout_keeps_observed_heartbeat(self):
+        class InterruptedStream(io.BytesIO):
+            def readline(self, size=-1):
+                line = super().readline(size)
+                if not line:
+                    raise TimeoutError("private error")
+                return line
+
+        response = InterruptedStream(frame("keepalive", {"detail": "private payload"}))
+        response.headers = Message()
+        response.headers["Content-Type"] = "text/event-stream"
+        self.client._opener.open.return_value = response
+        observer = Mock()
+        with self.assertRaises(AgentArtsError) as caught:
+            self.client.ask("test", observer=observer)
+        self.assertEqual(caught.exception.timeout_phase, "waiting_for_stream_data")
+        observer.assert_called_once_with("keepalive", {})
+        self.assertNotIn("private error", str(caught.exception))
 
     def test_complete_final_and_sanitized_http_errors(self):
         stream = frame("chat.final", {"data": {"content": "final answer", "is_complete": True}})

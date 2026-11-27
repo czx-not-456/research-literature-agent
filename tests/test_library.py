@@ -464,7 +464,7 @@ class LiteratureLibraryTest(unittest.TestCase):
         library.set_matrix_cell(paper["id"], "limitations", "Earlier limitation", None, "")
         path = self.report_request([paper["id"]], "引文 & 方法").location
         self.assertEqual(self.client.post(path + "/sections/background", data={
-            "csrf_token": self.csrf(), "body": "核验结果 <section> 保持可读。", "action": "save",
+            "csrf_token": self.csrf(), "body": "核验结果 <section> 保持可读。\n同段续行。", "action": "save",
         }).status_code, 302)
         library.set_matrix_cell(paper["id"], "limitations", "Updated limitation", None, "")
         response = self.client.post(path + "/sections/limitations", data={
@@ -487,6 +487,9 @@ class LiteratureLibraryTest(unittest.TestCase):
             words = [node.text for node in doc.iter() if node.tag.endswith("}t")]
             self.assertIn("引文 & 方法", words)
             self.assertIn("核验结果 <section> 保持可读。", words)
+            edited = next(run for run in doc.findall(".//{*}r")
+                          if any(node.text == "同段续行。" for node in run.findall("{*}t")))
+            self.assertIsNotNone(edited.find("{*}br"))
             self.assertIn("Updated limitation", words)
             self.assertTrue(all(part in archive.namelist() for part in ("[Content_Types].xml", "word/styles.xml")))
         self.assertEqual(fresh.get(path + "/export/pdf").status_code, 404)
@@ -534,6 +537,22 @@ class LiteratureLibraryTest(unittest.TestCase):
         path, paper = self.document_row(self.upload(raw.getvalue(), "phrase-ranking.pdf"))
         body = self.qa_request([paper["id"]], "What is scaled dot product attention?").get_data(as_text=True)
         self.assertLess(body.index(f'href="{path}?page=2"'), body.index(f'href="{path}?page=1"'))
+
+    def test_qa_prefers_complete_quoted_phrase_to_repeated_partial_matches(self):
+        from research_library.grounding import select_passages
+
+        rows = [
+            {"document_id": "paper", "title": "Research", "number": 1,
+             "text": "We use a “next sentence prediction” task that jointly trains two objectives."},
+            {"document_id": "paper", "title": "Research", "number": 2,
+             "text": "The next sentence prediction objective is discussed. " * 5
+                     + "Other tasks jointly use the same corpus."},
+            {"document_id": "paper", "title": "Research", "number": 3,
+             "text": "Next sentence prediction is evaluated and next sentence prediction improves."},
+        ]
+        passages = select_passages("next sentence prediction task that jointly", rows)
+        self.assertEqual(passages[0].number, 1)
+        self.assertIn("task that jointly trains", passages[0].text)
 
     def test_qa_scope_limits_and_empty_evidence_do_not_call_cloud(self):
         _, paper = self.document_row(self.upload(sample_pdf("en"), "question-en.pdf"))

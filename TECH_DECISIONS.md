@@ -1,5 +1,12 @@
 # 技术决策记录
 
+## 2026-11-24 AgentArts 多步文献调研
+
+此轮采用 Managed Agents 自定义 Skill 执行公开 HTTPS 工具，单次 InvokeChat 验收平台选择、查找、核验与输出。与独立 MCP 网关链路分别记录。工具及验收脚本使用现有 Python 环境。
+
+[工作流核验](docs/platform-validation/managed-research-workflow.md)
+
+
 ## 2026-11-23 在线学术检索
 
 采用公开 Crossref REST 与 arXiv Atom，导入保存元数据及版本标识，复用已有证据来源模型。限流、许可与完整 PDF 所需权限按来源区分。[在线检索验收](docs/design/academic-search.md)

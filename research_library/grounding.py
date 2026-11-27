@@ -100,14 +100,28 @@ def _position(text, pattern, phrases):
     return best
 
 
+def _literal_english_phrase(question):
+    # Short pasted phrases can cross a line break or a closing quotation mark in a PDF.
+    words = question.casefold().strip().rstrip(".?!").split()
+    if (not 3 <= len(words) <= 12 or not all(re.fullmatch(r"[a-z0-9]+", word) for word in words)
+            or sum(word not in _STOP_EN for word in words) < 3):
+        return None
+    separator = r"""[\s\u2010-\u2014“”‘’"'-]+"""
+    return re.compile(r"(?<![a-z0-9])" + separator.join(words) + r"(?![a-z0-9])", re.IGNORECASE)
+
+
 def select_passages(question, pages):
     pattern = _match_pattern(_terms(question))
     phrases = _english_phrases(question)
+    literal_phrase = _literal_english_phrase(question)
     allow_overview = bool(_OVERVIEW.search(question))
     docs = {}
     for row in pages:
         text = row["text"]
         score, offset = _position(text, pattern, phrases)
+        if literal_phrase and (exact := literal_phrase.search(text)):
+            score += 16  # A full phrase outweighs the maximum partial-phrase bonus of 15.
+            offset = exact.start()
         if score == 0 and not (allow_overview and row["number"] <= 2):
             continue
         start = max(0, offset - 155)

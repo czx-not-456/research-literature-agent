@@ -1,5 +1,59 @@
 # 开发与调研日志
 
+### 2026-11-27 真实论文系统测试
+
+用正式中英文论文验证文本、原件页码、矩阵、报告及双格式导出，用栅格页验证扫描件回退。修复英文完整短语排序和 Word 段内换行，47 项本地测试通过。Crossref 导入成功，arXiv 实查触发限流。[结果与复现](docs/system-testing/acceptance-results.md)
+
+### AgentArts 云端工具验收阻塞
+
+最后一次实时 Skill 检查返回 skill_tool 配对结果，未发起 Bash。保留请求 ID 和本轮结果，结束排查，等待用户确认后续安排。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+### AgentArts 实时 Skill 检查
+
+旧会话再次查询未返回历史消息。实时探针保留配对工具结果、错误状态与固定停点枚举，只接受真实 Bash 帮助输出作为启动通过证据。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+### AgentArts 历史工具结果配对
+
+账号侧历史复查识别了 skill_tool 和 Bash ls，未配对结果且未收到历史结束标记。最小检查支持按同一请求的工具调用 ID 匹配内外层结果字段及乱序记录。45 项本地回归通过。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+### AgentArts 既有 Skill 会话复查
+
+用户已确认版本中的 Skill 关联与 Bash 开关。最近一次检查返回一个 Bash 列表和一个未识别工具。探针可读取同一会话，只保留定位所需的工具名、配对状态及固定文件名是否出现。云端脚本启动仍待核实。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+### AgentArts Skill 关联与脚本发现检查
+
+账号侧最小检查收到 ls、find、find、cd 和最终响应。更新提示词以匹配 Skill 的科研任务描述，并区分目录探索输出、脚本路径出现和帮助命令通过。需确认当前版本的 Skill 关联，再复跑一次最小检查。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+### AgentArts 最小检查超时诊断
+
+账号侧 Skill 检查在收到可识别事件前超时。探针区分等待 HTTP 响应头、读取事件流与超过回答窗口，并记录心跳计数及耗时。42 项本地测试通过，账号侧签名复测待执行。[验证记录](docs/platform-validation/managed-research-workflow.md)
+
+### AgentArts 历史查询及最小启动检查
+
+账号侧只读查询未得到可处理的结束标记。探针保留正常读到的部分历史，新增 Skill 帮助检查以隔离脚本启动问题。40 项测试通过，账号侧检查待运行。[记录](docs/platform-validation/managed-research-workflow.md)
+
+### 2026-11-24 AgentArts 历史复查
+
+第三次账号侧探针收到三条 Bash 调用，尚未取得学术脚本执行证据。按官方契约实现签名 GET 和历史 SSE 回放，并过滤到原请求。38 项本地测试通过。既有会话等待账号侧复查。[记录](docs/platform-validation/managed-research-workflow.md)
+
+
+### 2026-11-24 第二次账号侧工作流试跑
+
+确认平台发出 3 个工具调用事件，其中 2 个为 Bash，尚无两次 DOI 核验的证据。探针新增脱敏 Bash 分类，提示词明确以独立脚本命令执行各步骤。36 项测试通过。[日志定位与复测](docs/platform-validation/managed-research-workflow.md)
+
+
+### 2026-11-24 首次账号侧工作流试跑
+
+用户返回请求 ID 和 `not_verified` 结果。收到云端响应，旧探针没有可识别的工作流步骤。补充脱敏 SSE 诊断和常见 Bash/输出格式兼容，35 项测试通过，云端待按新版探针复测。[账号侧工作流记录](docs/platform-validation/managed-research-workflow.md)
+
+
+## 2026-11-24 AgentArts 多步文献调研
+
+开发 Crossref 只读 Skill、压缩包和可选 SSE 工具事件观察，验证候选依赖、工具调用顺序与简报书目。32 项本地测试，实际解包运行一次公开检索及两次 DOI 核验。浏览器连接受 Windows 沙箱限制，本机无 IAM 凭据，等待账号侧挂载和执行。
+
+[工作流核验](docs/platform-validation/managed-research-workflow.md)
+
+
 ## 2026-11-23 在线学术检索
 
 新增 Crossref 和 arXiv 检索、分页筛选、书目持久化、短期签名导入、源内去重及同 DOI 原件关联。29 项测试通过，三组真实结果导入临时库并重开核查。[在线检索验收](docs/design/academic-search.md)
