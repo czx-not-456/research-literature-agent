@@ -1,0 +1,345 @@
+{
+  "additional_samples": [
+    {
+      "file": "comet.pdf",
+      "url": "https://aclanthology.org/2020.emnlp-main.213.pdf",
+      "sha256": "b852d8db07905ed912366d06e898a40388bc7de5abb0a9ce310bac0e5b8947b3"
+    },
+    {
+      "file": "climp.pdf",
+      "url": "https://aclanthology.org/2021.eacl-main.242.pdf",
+      "sha256": "cd746cec67655ff1df0a3c1e334d861a57c38dc05ed8d717204ec05f285c0aa5"
+    },
+    {
+      "file": "kbqa-cn.pdf",
+      "url": "https://tis.hrbeu.edu.cn/oa/pdfdow.aspx?Sid=201707039",
+      "sha256": "c7460177c3970950a97ef2c4d0a66b6e4647b8262765a06266da5cc19d4f48cb"
+    },
+    {
+      "file": "relations-cn.pdf",
+      "url": "https://tis.hrbeu.edu.cn/oa/pdfdow.aspx?Sid=202204047",
+      "sha256": "f9f6911568854d7cb357671306adf37b69b09ece842280a22874b95fd4e30496"
+    }
+  ],
+  "labels": {
+    "bert.pdf": {
+      "question": [
+        8,
+        "effect of model size",
+        "fine-tuning task accuracy"
+      ],
+      "background": [
+        1,
+        "Language model pre-training has been shown"
+      ],
+      "method": [
+        3,
+        "two steps in our framework",
+        "pre-training"
+      ],
+      "innovation": [
+        1,
+        "new language representation model",
+        "Bidirectional Encoder Representations"
+      ],
+      "data": [
+        5,
+        "BooksCorpus",
+        "English Wikipedia"
+      ],
+      "setup": [
+        6,
+        "batch size of 32",
+        "3 epochs"
+      ],
+      "metrics": [
+        1,
+        "MultiNLI accuracy",
+        "SQuAD"
+      ],
+      "results": [
+        1,
+        "GLUE score to 80.5%",
+        "86.7%"
+      ]
+    },
+    "chinesebert.pdf": {
+      "question": [
+        8,
+        "We hypothesize glyph and pinyin embeddings"
+      ],
+      "background": [
+        1,
+        "Large-scale pretrained models have become"
+      ],
+      "method": [
+        2,
+        "we propose ChineseBERT",
+        "glyph and pinyin information"
+      ],
+      "innovation": [
+        8,
+        "we introduce ChineseBERT",
+        "glyph"
+      ],
+      "data": [
+        4,
+        "CommonCrawl",
+        "pretraining data"
+      ],
+      "setup": [
+        5,
+        "batch size of 8k"
+      ],
+      "metrics": [
+        6,
+        "Accuracy is reported for comparison"
+      ],
+      "results": [
+        1,
+        "significant performance boost over baseline models"
+      ],
+      "limitations": [
+        7,
+        "BQ Corpus more fits",
+        "than that of ChineseBERT"
+      ],
+      "future": [
+        8,
+        "training a large size version"
+      ]
+    },
+    "mrc-cn.pdf": {
+      "question": [
+        2,
+        "研究现状与发展趋势进行了综述"
+      ],
+      "background": [
+        2,
+        "机器阅读理解任务在近年来备受关注"
+      ],
+      "data": [
+        6,
+        "BookTest",
+        "机器阅读理解主要数据集统计"
+      ],
+      "metrics": [
+        7,
+        "3.2 评价指标",
+        "准确率"
+      ]
+    },
+    "srl-cn.pdf": {
+      "question": [
+        2,
+        "标注准确率受限较大",
+        "已无法满足当前需求"
+      ],
+      "background": [
+        2,
+        "中文语义角色标注则是语义理解领域的核心技术"
+      ],
+      "method": [
+        4,
+        "词序列标注的标记策略",
+        "神经网络分类器"
+      ],
+      "innovation": [
+        2,
+        "模型后处理阶段结合了Max pooling技术",
+        "词法和句式"
+      ],
+      "data": [
+        5,
+        "清华大学依存句法树库",
+        "原始语料"
+      ],
+      "setup": [
+        6,
+        "3组模型训练的对照实验",
+        "保持其他特征相同"
+      ],
+      "metrics": [
+        6,
+        "词准确率",
+        "句子准确率"
+      ],
+      "results": [
+        6,
+        "82.96",
+        "本文方法"
+      ],
+      "limitations": [
+        7,
+        "核心成分出错率较高"
+      ],
+      "future": [
+        7,
+        "接下来的研究工作中",
+        "结构化的高阶特征"
+      ]
+    },
+    "comet.pdf": {
+      "question": [
+        1,
+        "current metrics struggle",
+        "human judgements"
+      ],
+      "background": [
+        1,
+        "Historically, metrics for evaluating the quality of machine translation"
+      ],
+      "method": [
+        2,
+        "primary building block",
+        "cross-lingual"
+      ],
+      "innovation": [
+        1,
+        "we propose a novel approach",
+        "source"
+      ],
+      "data": [
+        4,
+        "QT21 corpus",
+        "DARR"
+      ],
+      "setup": [
+        5,
+        "4.1 Training Setup",
+        "share the same training setup"
+      ],
+      "metrics": [
+        5,
+        "Kendall’s Tau-like formulation"
+      ],
+      "results": [
+        6,
+        "often by significant margins",
+        "DARR Ranker model outperforms"
+      ],
+      "limitations": [
+        9,
+        "burdensome weight of parameters and inference time"
+      ],
+      "future": [
+        9,
+        "future work on COMET",
+        "DistilBERT"
+      ]
+    },
+    "climp.pdf": {
+      "question": [
+        1,
+        "can be used to investigate",
+        "what knowledge Chinese LMs"
+      ],
+      "background": [
+        1,
+        "Language models (LMs) are crucial parts"
+      ],
+      "method": [
+        2,
+        "We generate data from grammar templates"
+      ],
+      "innovation": [
+        1,
+        "we introduce the corpus of Chinese linguistic minimal pairs"
+      ],
+      "data": [
+        2,
+        "1,000 MPs",
+        "16 grammatical contrasts"
+      ],
+      "setup": [
+        3,
+        "0.4M, 2M, and 21.5M sentences"
+      ],
+      "metrics": [
+        3,
+        "We use accuracy for evaluation"
+      ],
+      "results": [
+        1,
+        "81.8%"
+      ],
+      "limitations": [
+        3,
+        "only contains 16 datasets"
+      ]
+    },
+    "kbqa-cn.pdf": {
+      "question": [
+        1,
+        "仅能回答特定领域的问题"
+      ],
+      "background": [
+        1,
+        "现有问答系统大多是面向领域的"
+      ],
+      "method": [
+        1,
+        "自定义词典分词和CRF模型",
+        "模糊匹配"
+      ],
+      "data": [
+        5,
+        "训练数据集",
+        "NLPCC2016"
+      ],
+      "metrics": [
+        5,
+        "此次评测使用了F-Measure值"
+      ],
+      "results": [
+        6,
+        "平均F值为0.695 6"
+      ]
+    },
+    "relations-cn.pdf": {
+      "question": [
+        2,
+        "曝光偏差对抽取性能的影响"
+      ],
+      "method": [
+        2,
+        "两阶段的双关系预测结构",
+        "门控线性单元"
+      ],
+      "innovation": [
+        2,
+        "减少抽取过程中错误三元组的生成"
+      ],
+      "data": [
+        7,
+        "NYT[26]",
+        "WebNLG[27]"
+      ],
+      "setup": [
+        7,
+        "试验环境如下",
+        "GeForce RTX 2060"
+      ],
+      "metrics": [
+        7,
+        "F1-score",
+        "精确率（Precision）",
+        "召回率"
+      ],
+      "results": [
+        7,
+        "整体性能对比",
+        "分别提升了1.4%和0.2%"
+      ],
+      "limitations": [
+        10,
+        "应对简单文本时性能的不足"
+      ],
+      "future": [
+        10,
+        "将改进实体解码结构",
+        "实体对匹配机制"
+      ]
+    }
+  }
+}

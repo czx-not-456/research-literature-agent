@@ -417,6 +417,26 @@ class LiteratureLibraryTest(unittest.TestCase):
             self.assertIn(anchor, cell["quote"])
             self.assertIn(cell["quote"], page)
 
+    def test_matrix_excludes_bibliography_and_prefers_explicit_future_work(self):
+        from research_library.matrix import propose_cells
+
+        def rows(*pages):
+            return [{"document_id": "sample", "number": n, "text": text} for n, text in enumerate(pages, 1)]
+
+        references = "参考文献：\nL. Author. Future work will use another approach."
+        result = propose_cells(rows("To ease future research we share code.", references))
+        self.assertFalse(any(field == "future" for _, field, *_ in result))
+
+        plan = "在本项目未来\n的工作中，将改进实体解码结构。"
+        result = propose_cells(rows("To ease future research we share code.", plan, references))
+        _, _, _, number, quote = next(row for row in result if row[1] == "future")
+        self.assertEqual(number, 2)
+        self.assertEqual(quote, plan)
+
+        english_plan = "Future work involves training a more compact model."
+        result = propose_cells(rows("To ease future research we share code.", english_plan, references))
+        self.assertEqual(next(row[4] for row in result if row[1] == "future"), english_plan)
+
     def test_matrix_editor_checks_evidence_preserves_manual_cells_and_exports(self):
         path, paper = self.document_row(self.upload(sample_pdf("en"), "one.pdf"))
         route = self.topic_path + "/matrix"

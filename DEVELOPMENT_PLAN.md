@@ -1,5 +1,9 @@
 # 开发计划（AgentArts 平台优先修订版）
 
+## 2026-11-28 矩阵全字段评测与 arXiv 复验
+
+旧文献库交付已获确认。用户授权继续推进，完成阶段六中的扩大语料评测和 arXiv 实网复验。矩阵、PDF、引用与报告均保留可复现实测记录。AgentArts 自主工具验收暂缓，等待用户确认阶段交付。[本轮验收](docs/system-testing/matrix-benchmark-results.md)
+
 ## 2026-11-27 独立系统测试
 
 用户明确确认暂缓 AgentArts 自主工具验收，先执行阶段六中可独立运行的部分。测试范围涵盖 PDF、引用、矩阵、报告导出与公开学术检索。交付后等待确认。[系统测试记录](docs/system-testing/acceptance-results.md)

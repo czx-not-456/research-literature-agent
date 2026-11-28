@@ -11,11 +11,13 @@ _FIELDS = (
     ("method", "核心方法", r"核心方法|研究方法|本文提出|我们提出|方法概述|our method|we propose|proposed (?:method|approach|framework)|methodology"),
     ("innovation", "创新点", r"创新点|主要贡献|本文贡献|贡献如下|本文首次|our (?:main )?contributions?|novel (?:contribution|model|approach)|we introduce"),
     ("data", "数据集", ""),
-    ("setup", "实验设置", r"实验设置|实验配置|实施细节|实现细节|对照实验|训练设置|超参数|experimental (?:setup|settings?)|implementation details|training (?:setup|details|procedure)|hyperparameters?"),
+    ("setup", "实验设置", r"(?:试验|实验)(?:设置|配置|环境)|实施细节|实现细节|对照实验|训练设置|超参数|experimental (?:setup|settings?)|implementation details|training (?:setup|details|procedure)|hyperparameters?"),
     ("metrics", "评价指标", ""),
     ("results", "主要实验结果", r"实验结果|主要结果|结果表明|experimental results|main results|results (?:show|indicate)|we achieve"),
     ("limitations", "研究局限", r"研究局限|局限性|研究限制|limitations?|drawbacks?|limited to|we do not (?:consider|evaluate|address)|a (?:key|main) shortcoming"),
-    ("future", "未来研究方向", r"未来研究|后续工作|未来工作|未来展望|有待进一步|future (?:work|research|directions?)"),
+    ("future", "未来研究方向",
+     r"未来\s*(?:的\s*)?(?:研究|工作|展望)|后续\s*工作|接下来的\s*研究工作|有待进一步|"
+     r"future\s+(?:work|research|directions?)(?=\s*(?:[:：]|(?:will|involves?|includes?|on|should)\b))"),
 )
 FIELDS = {key: label for key, label, _ in _FIELDS}
 _PATTERNS = {
@@ -25,7 +27,7 @@ _PATTERNS = {
 _SECTION_PREFIX = r"^[ \t]*(?:\d+(?:\.\d+)*\.?[ \t]+)?"
 _DATA_SECTION = re.compile(
     _SECTION_PREFIX + r"(?:(?:pre[ -]?training|training|evaluation|experimental|test)[ \t]+)?"
-    r"(?:datasets?|data(?:[ \t]+sources?)?|corpus|数据集|数据来源|实验数据|训练数据|语料选取|语料来源)"
+    r"(?:datasets?|data(?:[ \t]+(?:sources?|generation))?|corpus|数据集(?:(?:和|与)评价指标)?|数据来源|[实试]验数据|训练数据|语料选取|语料来源)"
     r"(?=[ \t]*(?:[:：]|$)|[ \t]+(?:we|the)\b)", re.I | re.M,
 )
 _METRIC_SECTION = re.compile(
@@ -34,17 +36,22 @@ _METRIC_SECTION = re.compile(
 )
 _DATA_RESOURCE = re.compile(r"\b(?:datasets?|data|corpus|corpora)\b|数据集|语料|实验数据", re.I)
 _DATA_USE = re.compile(
-    r"\bwe\s+(?:use[ds]?|collect(?:ed)?|sample[ds]?)\b|\b(?:trained|fine-tuned|evaluated|tested)\s+on\b|"
-    r"(?:本研究|本实验|实验|本文|我们)\s*(?:采用|选取|选用|使用|收集)|代表性数据集\s*如\s*表\s*\d",
+    r"\bwe\s+(?:use[ds]?|collect(?:ed)?|generate[ds]?|sample[ds]?)\b|"
+    r"\b(?:trained|fine-tuned|evaluated|tested)\s+on\b|"
+    r"(?:本研究|本[实试]验|[实试]验|本文|我们)(?:\s*[实试]验)?\s*(?:采用|选取|选用|使用|收集)|"
+    r"代表性数据集\s*如\s*表\s*\d",
     re.I,
 )
 _METRIC_DETAIL = re.compile(
     r"\b(?:accuracy|precision|recall|f1(?:[- ]score)?|bleu|rouge)\b[^\n]{0,45}"
     r"(?:\d+\.\d+|\d+\s*%)|\b(?:accuracy|f1|bleu|rouge)\s+is\s+(?:reported|used|measured)\b|"
-    r"\bprecision and recall\b|(?:词|句子)准确率|准确率[ /：:]+(?:%|\d)",
+    r"\bwe\s+use\s+(?:accuracy|precision|recall|f1)\s+for\s+evaluation\b|"
+    r"\bKendall[’']s\s+Tau(?:-like)?\s+formulation|\bprecision and recall\b|"
+    r"(?:F1(?:[- ]score)?|精确率|召回率)[^\n]{0,60}(?:\n[^\n]{0,28})?[ \t]*"
+    r"作为\s*(?:主要)?(?:评价|评估)指标|评测使用了\s*F[- ]Measure|(?:词|句子)准确率|准确率[ /：:]+(?:%|\d)",
     re.I,
 )
-_REFERENCE = re.compile(r"^[ \t]*(?:\d+\.?[ \t]+)?(?:References|Bibliography|参考文献)[ \t]*$", re.I | re.M)
+_REFERENCE = re.compile(_SECTION_PREFIX + r"(?:References|Bibliography|参考文献)[ \t]*[:：]?[ \t]*$", re.I | re.M)
 MAX_MATRIX_DOCUMENTS = 6
 CELL_LIMIT = 1400
 
